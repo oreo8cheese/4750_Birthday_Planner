@@ -1,0 +1,19 @@
+{
+    "logs": [
+        {
+            "outputFile": "com.example.birthday_planner.app-mergeDebugResources-39:/values-port/values-port.xml",
+            "map": [
+                {
+                    "source": "C:\\Users\\kates\\.gradle\\caches\\transforms-3\\9dc4ce99b73061232249364ce1f596d4\\transformed\\appcompat-1.1.0\\res\\values-port\\values-port.xml",
+                    "from": {
+                        "startLines": "2",
+                        "startColumns": "4",
+                        "startOffsets": "55",
+                        "endColumns": "55",
+                        "endOffsets": "106"
+                    }
+                }
+            ]
+        }
+    ]
+}
