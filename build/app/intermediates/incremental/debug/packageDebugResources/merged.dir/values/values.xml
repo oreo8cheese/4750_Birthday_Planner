@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="gcm_defaultSenderId" translatable="false">371701653269</string>
+    <string name="google_api_key" translatable="false">AIzaSyClAShjOAGtm5NZjUo8DBuv4ow-5vMA5pk</string>
+    <string name="google_app_id" translatable="false">1:371701653269:android:6bfdde1159ab56bd60531c</string>
+    <string name="google_crash_reporting_api_key" translatable="false">AIzaSyClAShjOAGtm5NZjUo8DBuv4ow-5vMA5pk</string>
+    <string name="google_storage_bucket" translatable="false">birthday-planner-38cd6.firebasestorage.app</string>
+    <string name="project_id" translatable="false">birthday-planner-38cd6</string>
     <style name="LaunchTheme" parent="@android:style/Theme.Light.NoTitleBar">
         
         <item name="android:windowBackground">@drawable/launch_background</item>

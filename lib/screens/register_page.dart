@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -94,18 +96,30 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               const SizedBox(height: 24),
               ElevatedButton(
-                onPressed: _showRegistrationMessage,
-                style: ElevatedButton.styleFrom(
+                onPressed: () {
+                  Future<UserCredential> ucFuture = FirebaseAuth.instance.createUserWithEmailAndPassword(
+                      email: _emailController.text,
+                      password: _passwordController.text);
+                  ucFuture.then((value) {
+                    print("Successfully Registered the User!");
+                  });
+                  ucFuture.catchError((error){
+                    print("Failed to Register the user!");
+                    print(error.toString());
+                  });
+                  style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.pink[300],
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
+                  padding: const EdgeInsets.symmetric(vertical: 16)
+                  );
+                  },
                 child: const Text(
                   'Register',
                   style: TextStyle(
                     fontSize: 16,
-                    color: Colors.white,
+                    color: Colors.pink,
                   ),
                 ),
+
               ),
             ],
           ),

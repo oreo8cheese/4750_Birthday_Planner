@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.birthday_planner.app-mergeDebugResources-39:/values-land/values-land.xml",
+            "outputFile": "com.example.birthday_planner.app-mergeDebugResources-48:/values-land/values-land.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\kates\\.gradle\\caches\\transforms-3\\9dc4ce99b73061232249364ce1f596d4\\transformed\\appcompat-1.1.0\\res\\values-land\\values-land.xml",
+                    "source": "C:\\Users\\kates\\.gradle\\caches\\8.10.2\\transforms\\7801aee5b3258a5e1ba1e53e657cf5bc\\transformed\\appcompat-1.1.0\\res\\values-land\\values-land.xml",
                     "from": {
                         "startLines": "2,3,4",
                         "startColumns": "4,4,4",

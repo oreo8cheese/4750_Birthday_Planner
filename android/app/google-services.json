@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "371701653269",
+    "project_id": "birthday-planner-38cd6",
+    "storage_bucket": "birthday-planner-38cd6.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:371701653269:android:6bfdde1159ab56bd60531c",
+        "android_client_info": {
+          "package_name": "com.example.birthday_planner"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyClAShjOAGtm5NZjUo8DBuv4ow-5vMA5pk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

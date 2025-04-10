@@ -1,10 +1,10 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.birthday_planner.app-mergeDebugResources-39:/values-sw360dp-v13/values-sw360dp-v13.xml",
+            "outputFile": "com.example.birthday_planner.app-mergeDebugResources-48:/values-sw360dp-v13/values-sw360dp-v13.xml",
             "map": [
                 {
-                    "source": "C:\\Users\\kates\\.gradle\\caches\\transforms-3\\72e7a2a21fa9ae177d3eff98d98f82b3\\transformed\\preference-1.2.1\\res\\values-sw360dp-v13\\values-sw360dp-v13.xml",
+                    "source": "C:\\Users\\kates\\.gradle\\caches\\8.10.2\\transforms\\ab3962d0d85e32b761b10b43dc5cf4e6\\transformed\\preference-1.2.1\\res\\values-sw360dp-v13\\values-sw360dp-v13.xml",
                     "from": {
                         "startLines": "2",
                         "startColumns": "4",
