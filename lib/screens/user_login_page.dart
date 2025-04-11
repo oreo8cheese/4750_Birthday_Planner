@@ -23,6 +23,10 @@ class _UserLoginPageState extends State<UserLoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Login'),
+        backgroundColor: Colors.pink[100],
+      ),
       backgroundColor: Colors.pink[50],
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -56,14 +60,36 @@ class _UserLoginPageState extends State<UserLoginPage> {
                     border: OutlineInputBorder(),
                   ),
                   obscureText: true,
+                    onFieldSubmitted: (value){
+                      FirebaseAuth.instance.signInWithEmailAndPassword(
+                          email: _emailController.text,
+                          password: _passwordController.text).then((value){
+                        print("Successfully Logged in user.");
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(builder: (context) => const MyHomePage()),
+                        );
+                      }).catchError((error) {
+                        print("Failed to Login.");
+                        print(error.toString());
+                      });
+                  },
                 ),
                 const SizedBox(height: 24),
                 ElevatedButton(
                   onPressed: () {
-                    Navigator.pushReplacement(
-                      context,
-                      MaterialPageRoute(builder: (context) => const MyHomePage()),
-                    );
+                      FirebaseAuth.instance.signInWithEmailAndPassword(
+                        email: _emailController.text,
+                        password: _passwordController.text).then((value){
+                          print("Successfully Logged in user.");
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(builder: (context) => const MyHomePage()),
+                          );
+                      }).catchError((error) {
+                        print("Failed to Login.");
+                        print(error.toString());
+                      });
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: Colors.pink[300],
