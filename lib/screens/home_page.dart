@@ -1,17 +1,58 @@
+import 'package:birthday_planner/screens/login_page.dart';
 import 'package:flutter/material.dart';
 import 'contact_book_page.dart';
 import 'calendar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class MyHomePage extends StatelessWidget {
   const MyHomePage({super.key});
+
+  Future<void> _showLogoutConfirmation(BuildContext context) async {
+    final bool? result = await showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Confirm Logout'),
+          content: const Text('Are you sure you want to log out?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Logout'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (result == true && context.mounted) {
+      await FirebaseAuth.instance.signOut();
+      if (context.mounted) {
+        Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (context) => const LoginPage()),
+          (route) => false,
+        );
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.pink[50],
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.pink[100],
         title: const Text('Birthday Planner'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () => _showLogoutConfirmation(context),
+          ),
+        ],
       ),
       body: Center(
         child: Column(

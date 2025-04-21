@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -96,30 +97,103 @@ class _RegisterPageState extends State<RegisterPage> {
               ),
               const SizedBox(height: 24),
               ElevatedButton(
-                onPressed: () {
-                  Future<UserCredential> ucFuture = FirebaseAuth.instance.createUserWithEmailAndPassword(
+                onPressed: () async {
+                  try {
+                    // Check password length
+                    if (_passwordController.text.length < 6) {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text('Invalid Password'),
+                            content: const Text('Password must be at least 6 characters long.'),
+                            actions: <Widget>[
+                              TextButton(
+                                child: const Text('OK'),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                      return;
+                    }
+
+                    // Check if passwords match
+                    if (_passwordController.text != _confirmPasswordController.text) {
+                      showDialog(
+                        context: context,
+                        builder: (BuildContext context) {
+                          return AlertDialog(
+                            title: const Text('Password Mismatch'),
+                            content: const Text('The passwords you entered do not match.'),
+                            actions: <Widget>[
+                              TextButton(
+                                child: const Text('OK'),
+                                onPressed: () {
+                                  Navigator.of(context).pop();
+                                },
+                              ),
+                            ],
+                          );
+                        },
+                      );
+                      return;
+                    }
+
+                    // If validation passes, proceed with registration
+                    final userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
                       email: _emailController.text,
-                      password: _passwordController.text);
-                  ucFuture.then((value) {
+                      password: _passwordController.text
+                    );
+                    
+                    // Add user to Firestore
+                    await FirebaseFirestore.instance
+                      .collection("users")
+                      .doc(userCredential.user!.uid)
+                      .set({
+                        "email": _emailController.text,
+                        "firstname": _firstNameController.text,
+                        "lastname": _lastNameController.text,
+                      });
+
+                    // Show success message
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Successfully Registered!'),
+                        backgroundColor: Colors.green,
+                        duration: Duration(seconds: 3),
+                      ),
+                    );
+
                     print("Successfully Registered the User!");
-                  });
-                  ucFuture.catchError((error){
-                    print("Failed to Register the user!");
-                    print(error.toString());
-                  });
-                  style: ElevatedButton.styleFrom(
+                    print("User ID: ${userCredential.user!.uid}");
+                    
+                  } catch (error) {
+                    // Show error message
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Registration failed: ${error.toString()}'),
+                        backgroundColor: Colors.red,
+                        duration: const Duration(seconds: 3),
+                      ),
+                    );
+                    print("Failed to Register: ${error.toString()}");
+                  }
+                },
+                style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.pink[300],
-                  padding: const EdgeInsets.symmetric(vertical: 16)
-                  );
-                  },
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                ),
                 child: const Text(
                   'Register',
                   style: TextStyle(
                     fontSize: 16,
-                    color: Colors.pink,
+                    color: Colors.white,
                   ),
                 ),
-
               ),
             ],
           ),

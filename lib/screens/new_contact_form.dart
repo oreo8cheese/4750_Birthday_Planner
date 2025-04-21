@@ -1,11 +1,21 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'contact.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 // You'll need to create this new widget in a separate file: lib/screens/new_contact_form.dart
 class NewContactForm extends StatefulWidget {
-  const NewContactForm({super.key});
+  final bool isEditing;
+  final String? contactId;
+
+  const NewContactForm({
+    super.key, 
+    this.isEditing = false, 
+    this.contactId,
+  });
 
   @override
   State<NewContactForm> createState() => _NewContactFormState();
@@ -15,6 +25,7 @@ class _NewContactFormState extends State<NewContactForm> {
   File? _imageFile;
   final ImagePicker _picker = ImagePicker();
   DateTime? selectedDate;
+  String? existingPhotoUrl;
   
   // Add controllers
   final _firstNameController = TextEditingController();
@@ -23,6 +34,57 @@ class _NewContactFormState extends State<NewContactForm> {
   final _relationshipController = TextEditingController();
   List<TextEditingController> likesControllers = [TextEditingController()];
   List<TextEditingController> dislikesControllers = [TextEditingController()];
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.isEditing) {
+      _loadContactData();
+    }
+  }
+
+  Future<void> _loadContactData() async {
+    try {
+      final docSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .collection('contacts')
+          .doc(widget.contactId)
+          .get();
+
+      if (docSnapshot.exists) {
+        final data = docSnapshot.data()!;
+        setState(() {
+          _firstNameController.text = data['firstName'] ?? '';
+          _lastNameController.text = data['lastName'] ?? '';
+          _selectedGender = data['gender'];
+          _relationshipController.text = data['relationship'] ?? '';
+          existingPhotoUrl = data['photoUrl'];
+          
+          // Handle birthday
+          if (data['birthday'] != null) {
+            selectedDate = (data['birthday'] as Timestamp).toDate();
+          }
+          
+          // Handle likes
+          final likes = List<String>.from(data['likes'] ?? []);
+          likesControllers = likes.map((like) => TextEditingController(text: like)).toList();
+          if (likesControllers.isEmpty) {
+            likesControllers.add(TextEditingController());
+          }
+          
+          // Handle dislikes
+          final dislikes = List<String>.from(data['dislikes'] ?? []);
+          dislikesControllers = dislikes.map((dislike) => TextEditingController(text: dislike)).toList();
+          if (dislikesControllers.isEmpty) {
+            dislikesControllers.add(TextEditingController());
+          }
+        });
+      }
+    } catch (e) {
+      print('Error loading contact data: $e');
+    }
+  }
 
   @override
   void dispose() {
@@ -79,6 +141,33 @@ class _NewContactFormState extends State<NewContactForm> {
     }
   }
 
+  Future<String?> _uploadImage(File imageFile, String contactId) async {
+    try {
+      // Create a unique path for the image
+      final String path = 'contact_photos/${FirebaseAuth.instance.currentUser!.uid}/$contactId/${DateTime.now().millisecondsSinceEpoch}.jpg';
+      
+      // Create the storage reference
+      final ref = FirebaseStorage.instance.ref().child(path);
+      
+      // Upload the file with content type
+      final metadata = SettableMetadata(
+        contentType: 'image/jpeg',
+        customMetadata: {'picked-file-path': imageFile.path}
+      );
+      
+      // Upload the file
+      await ref.putFile(imageFile, metadata);
+      
+      // Get the download URL
+      final url = await ref.getDownloadURL();
+      print('Image uploaded successfully. URL: $url'); // Add debug print
+      return url;
+    } catch (e) {
+      print('Failed to upload image: $e');
+      return null;
+    }
+  }
+
   Widget buildExpandableSection(String title, List<TextEditingController> controllers) {
     return ExpansionTile(
       title: Text(title),
@@ -111,7 +200,7 @@ class _NewContactFormState extends State<NewContactForm> {
       backgroundColor: Colors.pink[50],
       appBar: AppBar(
         backgroundColor: Colors.pink[100],
-        title: const Text('New Contact'),
+        title: Text(widget.isEditing ? 'Edit Contact' : 'New Contact'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -124,24 +213,21 @@ class _NewContactFormState extends State<NewContactForm> {
                   child: CircleAvatar(
                     radius: 50,
                     backgroundColor: Colors.grey[300],
-                    child: _imageFile != null
-                        ? ClipRRect(
-                            borderRadius: BorderRadius.circular(50),
-                            child: Image.file(
-                              _imageFile!,
-                              width: 100,
-                              height: 100,
-                              fit: BoxFit.cover,
-                            ),
-                          )
-                        : const Icon(
+                    backgroundImage: _imageFile != null
+                        ? FileImage(_imageFile!)
+                        : (existingPhotoUrl != null && existingPhotoUrl!.isNotEmpty)
+                            ? NetworkImage(existingPhotoUrl!) as ImageProvider
+                            : null,
+                    child: (_imageFile == null && (existingPhotoUrl == null || existingPhotoUrl!.isEmpty))
+                        ? const Icon(
                             Icons.camera_alt,
                             size: 40,
                             color: Colors.grey,
-                          ),
+                          )
+                        : null,
+                  ),
                 ),
               ),
-            ),
               Text(
                 'Add a photo',
                 style: TextStyle(
@@ -223,8 +309,125 @@ class _NewContactFormState extends State<NewContactForm> {
               buildExpandableSection('Dislikes', dislikesControllers),
               const SizedBox(height: 24),
               ElevatedButton(
-                onPressed: _submitForm,
-                child: const Text('Save Contact'),
+                onPressed: () async {
+                  // Check only name is required
+                  if (_firstNameController.text.isEmpty || _lastNameController.text.isEmpty) {
+                    showDialog(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: const Text('Missing Information'),
+                          content: const Text('Please fill in the required fields:\n\n• First Name\n• Last Name'),
+                          actions: <Widget>[
+                            TextButton(
+                              child: const Text('OK'),
+                              onPressed: () {
+                                Navigator.of(context).pop();
+                              },
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                    return;
+                  }
+
+                  try {
+                    // Create contact data with only required fields
+                    final Map<String, dynamic> contactData = {
+                      "firstName": _firstNameController.text,
+                      "lastName": _lastNameController.text,
+                    };
+
+                    // Add optional fields only if they have values
+                    if (_selectedGender != null) {
+                      contactData["gender"] = _selectedGender.toString();
+                    }
+                    if (selectedDate != null) {
+                      contactData["birthday"] = Timestamp.fromDate(selectedDate!);
+                    }
+                    if (_relationshipController.text.isNotEmpty) {
+                      contactData["relationship"] = _relationshipController.text;
+                    }
+
+                    // Add non-empty likes
+                    final likes = likesControllers
+                        .map((controller) => controller.text)
+                        .where((text) => text.isNotEmpty)
+                        .toList();
+                    if (likes.isNotEmpty) {
+                      contactData["likes"] = likes;
+                    }
+
+                    // Add non-empty dislikes
+                    final dislikes = dislikesControllers
+                        .map((controller) => controller.text)
+                        .where((text) => text.isNotEmpty)
+                        .toList();
+                    if (dislikes.isNotEmpty) {
+                      contactData["dislikes"] = dislikes;
+                    }
+
+                    final contactsCollection = FirebaseFirestore.instance
+                        .collection("users")
+                        .doc(FirebaseAuth.instance.currentUser!.uid)
+                        .collection("contacts");
+
+                    late DocumentReference docRef;
+                    if (widget.isEditing) {
+                      docRef = contactsCollection.doc(widget.contactId);
+                      await docRef.update(contactData);
+                    } else {
+                      docRef = await contactsCollection.add(contactData);
+                    }
+
+                    // If there's a new image, upload it and update the contact
+                    if (_imageFile != null) {
+                      final imageUrl = await _uploadImage(_imageFile!, docRef.id);
+                      if (imageUrl != null) {
+                        print('Updating contact with photo URL: $imageUrl');
+                        await docRef.update({'photoUrl': imageUrl});
+                      } else {
+                        print('Failed to get image URL');
+                      }
+                    }
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(widget.isEditing 
+                          ? '${_firstNameController.text} updated'
+                          : '${_firstNameController.text} saved'),
+                        backgroundColor: Colors.green,
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+                    Navigator.pop(context);
+                  } catch (error) {
+                    print("Failed to ${widget.isEditing ? 'update' : 'add'} contact: $error");
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Failed to ${widget.isEditing ? 'update' : 'save'} contact: ${error.toString()}'),
+                        backgroundColor: Colors.red,
+                        duration: const Duration(seconds: 3),
+                      ),
+                    );
+                  }
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.pink[100],
+                  minimumSize: const Size(200, 50),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 32,
+                    vertical: 16
+                  ),
+                ),
+                child: Text(
+                  widget.isEditing ? 'Update Contact' : 'Save Contact',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Colors.black87,
+                  ),
+                ),
               ),
             ],
           ),

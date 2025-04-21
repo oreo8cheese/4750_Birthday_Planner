@@ -1,11 +1,309 @@
 import 'package:flutter/material.dart';
-import 'contact.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:io';
+import 'new_contact_form.dart';
+import '../services/openai_service.dart';
+import '../config/api_config.dart';
 
 class ContactDetailsPage extends StatelessWidget {
-  final Contact contact;
+  final String contactId; // Change from Contact to String to store document ID
 
-  const ContactDetailsPage({super.key, required this.contact});
+  const ContactDetailsPage({super.key, required this.contactId});
+
+  Future<String?> _showPriceRangeDialog(BuildContext context) async {
+    return showDialog<String>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Select Price Range'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                title: const Text('Under \$25'),
+                onTap: () => Navigator.pop(context, 'under \$25'),
+              ),
+              ListTile(
+                title: const Text('\$25 - \$50'),
+                onTap: () => Navigator.pop(context, '\$25 - \$50'),
+              ),
+              ListTile(
+                title: const Text('\$50 - \$100'),
+                onTap: () => Navigator.pop(context, '\$50 - \$100'),
+              ),
+              ListTile(
+                title: const Text('\$100 - \$200'),
+                onTap: () => Navigator.pop(context, '\$100 - \$200'),
+              ),
+              ListTile(
+                title: const Text('Over \$200'),
+                onTap: () => Navigator.pop(context, 'over \$200'),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Future<void> _addGiftIdea(BuildContext context, String contactId, List<String> currentGiftIdeas) async {
+    final TextEditingController controller = TextEditingController();
+    
+    return showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Add Gift Idea'),
+        content: TextField(
+          controller: controller,
+          decoration: const InputDecoration(
+            hintText: 'Enter gift idea',
+            border: OutlineInputBorder(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () async {
+              if (controller.text.isNotEmpty) {
+                final newGiftIdeas = [...currentGiftIdeas, controller.text];
+                await FirebaseFirestore.instance
+                    .collection('users')
+                    .doc(FirebaseAuth.instance.currentUser!.uid)
+                    .collection('contacts')
+                    .doc(contactId)
+                    .update({'giftIdeas': newGiftIdeas});
+                Navigator.pop(context);
+              }
+            },
+            child: const Text('Add'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _saveAIGiftIdea(BuildContext context, String contactId, String giftIdea, List<String> currentGiftIdeas) async {
+    try {
+      final newGiftIdeas = [...currentGiftIdeas, giftIdea];
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .collection('contacts')
+          .doc(contactId)
+          .update({'giftIdeas': newGiftIdeas});
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Gift idea saved!'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to save gift idea: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _removeGiftIdea(BuildContext context, String contactId, List<String> currentGiftIdeas, int index) async {
+    try {
+      final newGiftIdeas = List<String>.from(currentGiftIdeas)..removeAt(index);
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(FirebaseAuth.instance.currentUser!.uid)
+          .collection('contacts')
+          .doc(contactId)
+          .update({'giftIdeas': newGiftIdeas});
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to remove gift idea: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  Future<void> _showGiftSuggestions(BuildContext context, Map<String, dynamic> contactData) async {
+    final priceRange = await _showPriceRangeDialog(context);
+    if (priceRange == null) return;
+
+    Future<void> generateAndShowSuggestions() async {
+      try {
+        showDialog(
+          context: context,
+          builder: (context) => const Center(
+            child: CircularProgressIndicator(),
+          ),
+        );
+
+        final openAI = OpenAIService(apiKey: APIConfig.openAIKey);
+        final suggestions = await openAI.generateGiftSuggestions(
+          firstName: contactData['firstName'],
+          likes: List<String>.from(contactData['likes'] ?? []),
+          dislikes: List<String>.from(contactData['dislikes'] ?? []),
+          relationship: contactData['relationship'],
+          gender: contactData['gender'],
+          priceRange: priceRange,
+        );
+
+        if (!context.mounted) return;
+        Navigator.pop(context); // Dismiss loading dialog
+
+        final currentGiftIdeas = List<String>.from(contactData['giftIdeas'] ?? []);
+        final savedIdeasNotifier = ValueNotifier<Set<String>>(
+          Set.from(currentGiftIdeas),
+        );
+
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: Text('Gift Ideas for ${contactData['firstName']}'),
+            content: SingleChildScrollView(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('Price Range: $priceRange'),
+                  const SizedBox(height: 16),
+                  ...suggestions.map((suggestion) {
+                    final displaySuggestion = '${suggestion.idea} - ${suggestion.explanation} (Around ${suggestion.approximatePrice})';
+                    final cleanedIdea = suggestion.cleanIdea;
+                    return ValueListenableBuilder(
+                      valueListenable: savedIdeasNotifier,
+                      builder: (context, Set<String> savedIdeas, _) {
+                        final isSaved = savedIdeas.contains(cleanedIdea);
+                        return Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Text(displaySuggestion),
+                              ),
+                              IconButton(
+                                icon: Icon(
+                                  isSaved ? Icons.check_circle : Icons.add_circle_outline,
+                                  color: isSaved ? Colors.green : Colors.blue,
+                                ),
+                                onPressed: isSaved ? null : () async {
+                                  await _saveAIGiftIdea(
+                                    context,
+                                    contactId,
+                                    cleanedIdea,
+                                    List<String>.from(savedIdeas),
+                                  );
+                                  savedIdeasNotifier.value = {...savedIdeas, cleanedIdea};
+                                },
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    );
+                  }),
+                  const SizedBox(height: 16),
+                  const Text(
+                    'Click the + button to save a suggestion to your gift ideas list.',
+                    style: TextStyle(
+                      fontStyle: FontStyle.italic,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Close'),
+              ),
+              TextButton.icon(
+                onPressed: () {
+                  Navigator.pop(context);
+                  generateAndShowSuggestions();
+                },
+                icon: const Icon(Icons.refresh),
+                label: const Text('Regenerate'),
+                style: TextButton.styleFrom(
+                  foregroundColor: Colors.pink[700],
+                ),
+              ),
+            ],
+          ),
+        );
+      } catch (e) {
+        if (!context.mounted) return;
+        Navigator.pop(context); // Dismiss loading dialog
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to generate gift suggestions: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+
+    // Initial generation
+    await generateAndShowSuggestions();
+  }
+
+  Future<void> _showBirthdayMessage(BuildContext context, Map<String, dynamic> contactData) async {
+    final openAI = OpenAIService(apiKey: APIConfig.openAIKey);
+    
+    try {
+      showDialog(
+        context: context,
+        builder: (context) => const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+
+      final message = await openAI.generateBirthdayMessage(
+        firstName: contactData['firstName'],
+        relationship: contactData['relationship'] ?? 'friend',
+      );
+
+      Navigator.pop(context); // Dismiss loading dialog
+
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Birthday Message for ${contactData['firstName']}'),
+          content: SingleChildScrollView(
+            child: Text(message),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Close'),
+            ),
+          ],
+        ),
+      );
+    } catch (e) {
+      Navigator.pop(context); // Dismiss loading dialog
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to generate birthday message: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -13,42 +311,173 @@ class ContactDetailsPage extends StatelessWidget {
       backgroundColor: Colors.pink[50],
       appBar: AppBar(
         backgroundColor: Colors.pink[100],
-        title: Text('${contact.firstName} ${contact.lastName}'),
+        title: const Text('Contact Details'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.edit),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => NewContactForm(
+                    isEditing: true,
+                    contactId: contactId,
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: CircleAvatar(
-                radius: 60,
-                backgroundImage: contact.imagePath != null
-                    ? FileImage(File(contact.imagePath!))
-                    : null,
-                child: contact.imagePath == null
-                    ? Text(
-                        '${contact.firstName[0]}${contact.lastName[0]}',
-                        style: const TextStyle(fontSize: 40),
-                      )
-                    : null,
-              ),
+      body: StreamBuilder<DocumentSnapshot>(
+        stream: FirebaseFirestore.instance
+            .collection('users')
+            .doc(FirebaseAuth.instance.currentUser!.uid)
+            .collection('contacts')
+            .doc(contactId)
+            .snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Center(child: Text('Error: ${snapshot.error}'));
+          }
+
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (!snapshot.hasData || !snapshot.data!.exists) {
+            return const Center(child: Text('Contact not found'));
+          }
+
+          final contactData = snapshot.data!.data() as Map<String, dynamic>;
+          final firstName = contactData['firstName'] ?? '';
+          final lastName = contactData['lastName'] ?? '';
+          final gender = contactData['gender'] ?? '';
+          final relationship = contactData['relationship'] ?? '';
+          final likes = List<String>.from(contactData['likes'] ?? []);
+          final dislikes = List<String>.from(contactData['dislikes'] ?? []);
+          final giftIdeas = List<String>.from(contactData['giftIdeas'] ?? []);
+          
+          // Convert Timestamp to DateTime
+          final Timestamp? birthdayTimestamp = contactData['birthday'];
+          final DateTime birthday = birthdayTimestamp?.toDate() ?? DateTime.now();
+
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Center(
+                  child: CircleAvatar(
+                    radius: 60,
+                    backgroundColor: Colors.grey[300],
+                    backgroundImage: contactData['photoUrl']?.isNotEmpty == true
+                        ? NetworkImage(contactData['photoUrl'])
+                        : null,
+                    child: (contactData['photoUrl']?.isEmpty ?? true)
+                        ? Text(
+                            '${firstName.isNotEmpty ? firstName[0] : ''}${lastName.isNotEmpty ? lastName[0] : ''}',
+                            style: const TextStyle(fontSize: 40),
+                          )
+                        : null,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    ElevatedButton.icon(
+                      onPressed: () => _showGiftSuggestions(context, contactData),
+                      icon: const Icon(Icons.card_giftcard),
+                      label: const Text('Gift Ideas'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.pink[100],
+                      ),
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: () => _showBirthdayMessage(context, contactData),
+                      icon: const Icon(Icons.message),
+                      label: const Text('Birthday Message'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.pink[100],
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 24),
+                _buildInfoSection('Personal Information', [
+                  _buildInfoRow('First Name', firstName),
+                  _buildInfoRow('Last Name', lastName),
+                  _buildInfoRow('Gender', gender),
+                  _buildInfoRow('Birthday', 
+                    '${birthday.day}/${birthday.month}/${birthday.year}'),
+                  _buildInfoRow('Relationship', relationship),
+                ]),
+                const SizedBox(height: 16),
+                _buildListSection('Likes', likes),
+                const SizedBox(height: 16),
+                _buildListSection('Dislikes', dislikes),
+                const SizedBox(height: 16),
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text(
+                              'Gift Ideas',
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.add),
+                              onPressed: () => _addGiftIdea(context, contactId, giftIdeas),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        ...giftIdeas.asMap().entries.map((entry) => Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.card_giftcard, size: 16),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(entry.value),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.delete_outline, size: 20),
+                                onPressed: () => _removeGiftIdea(
+                                  context,
+                                  contactId,
+                                  giftIdeas,
+                                  entry.key,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )),
+                        if (giftIdeas.isEmpty)
+                          const Text(
+                            'No gift ideas yet. Add your own or generate some!',
+                            style: TextStyle(
+                              fontStyle: FontStyle.italic,
+                              color: Colors.grey,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 24),
-            _buildInfoSection('Personal Information', [
-              _buildInfoRow('First Name', contact.firstName),
-              _buildInfoRow('Last Name', contact.lastName),
-              _buildInfoRow('Gender', contact.gender),
-              _buildInfoRow('Birthday', 
-                '${contact.birthday.day}/${contact.birthday.month}/${contact.birthday.year}'),
-              _buildInfoRow('Relationship', contact.relationship),
-            ]),
-            const SizedBox(height: 16),
-            _buildListSection('Likes', contact.likes),
-            const SizedBox(height: 16),
-            _buildListSection('Dislikes', contact.dislikes),
-          ],
-        ),
+          );
+        },
       ),
     );
   }
