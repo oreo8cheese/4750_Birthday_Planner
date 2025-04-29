@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'new_contact_form.dart';
 import 'contact_details_page.dart';
+import 'dart:io';
 
 class ContactBookPage extends StatefulWidget {
   const ContactBookPage({super.key});
@@ -136,10 +137,23 @@ class _ContactBookPageState extends State<ContactBookPage> {
                   leading: CircleAvatar(
                     radius: 25,
                     backgroundColor: Colors.grey[300],
-                    backgroundImage: contactData['photoUrl']?.isNotEmpty == true
-                        ? NetworkImage(contactData['photoUrl'])
+                    backgroundImage: contactData['photoPath']?.isNotEmpty == true
+                        ? (() {
+                            final file = File(contactData['photoPath']);
+                            if (!file.existsSync()) {
+                              // Try alternative path if the original doesn't exist
+                              final alternativePath = contactData['photoPath'].replaceAll('/files/', '/app_flutter/');
+                              final alternativeFile = File(alternativePath);
+                              if (alternativeFile.existsSync()) {
+                                return FileImage(alternativeFile);
+                              }
+                              return null;
+                            }
+                            return FileImage(file);
+                          })()
                         : null,
-                    child: (contactData['photoUrl']?.isEmpty ?? true)
+                    child: (contactData['photoPath']?.isEmpty ?? true) || 
+                       (!File(contactData['photoPath'] ?? '').existsSync())
                         ? Text(
                             '${firstName.isNotEmpty ? firstName[0] : ''}${lastName.isNotEmpty ? lastName[0] : ''}',
                             style: const TextStyle(fontSize: 20),

@@ -74,6 +74,7 @@ MERGED from [:firebase_storage] C:\Users\kates\StudioProjects\birthday_planner\b
 MERGED from [:firebase_core] C:\Users\kates\StudioProjects\birthday_planner\build\firebase_core\intermediates\merged_manifest\debug\AndroidManifest.xml:2:1-15:12
 MERGED from [:image_picker_android] C:\Users\kates\StudioProjects\birthday_planner\build\image_picker_android\intermediates\merged_manifest\debug\AndroidManifest.xml:2:1-34:12
 MERGED from [:flutter_plugin_android_lifecycle] C:\Users\kates\StudioProjects\birthday_planner\build\flutter_plugin_android_lifecycle\intermediates\merged_manifest\debug\AndroidManifest.xml:2:1-7:12
+MERGED from [:path_provider_android] C:\Users\kates\StudioProjects\birthday_planner\build\path_provider_android\intermediates\merged_manifest\debug\AndroidManifest.xml:2:1-7:12
 MERGED from [:shared_preferences_android] C:\Users\kates\StudioProjects\birthday_planner\build\shared_preferences_android\intermediates\merged_manifest\debug\AndroidManifest.xml:2:1-7:12
 MERGED from [com.google.firebase:firebase-auth:23.2.0] C:\Users\kates\.gradle\caches\8.10.2\transforms\4a13622334858c09faed678cbe66f441\transformed\jetified-firebase-auth-23.2.0\AndroidManifest.xml:17:1-75:12
 MERGED from [androidx.preference:preference:1.2.1] C:\Users\kates\.gradle\caches\8.10.2\transforms\ab3962d0d85e32b761b10b43dc5cf4e6\transformed\preference-1.2.1\AndroidManifest.xml:17:1-24:12
@@ -214,6 +215,8 @@ MERGED from [:image_picker_android] C:\Users\kates\StudioProjects\birthday_plann
 MERGED from [:image_picker_android] C:\Users\kates\StudioProjects\birthday_planner\build\image_picker_android\intermediates\merged_manifest\debug\AndroidManifest.xml:6:5-44
 MERGED from [:flutter_plugin_android_lifecycle] C:\Users\kates\StudioProjects\birthday_planner\build\flutter_plugin_android_lifecycle\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-44
 MERGED from [:flutter_plugin_android_lifecycle] C:\Users\kates\StudioProjects\birthday_planner\build\flutter_plugin_android_lifecycle\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-44
+MERGED from [:path_provider_android] C:\Users\kates\StudioProjects\birthday_planner\build\path_provider_android\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-44
+MERGED from [:path_provider_android] C:\Users\kates\StudioProjects\birthday_planner\build\path_provider_android\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-44
 MERGED from [:shared_preferences_android] C:\Users\kates\StudioProjects\birthday_planner\build\shared_preferences_android\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-44
 MERGED from [:shared_preferences_android] C:\Users\kates\StudioProjects\birthday_planner\build\shared_preferences_android\intermediates\merged_manifest\debug\AndroidManifest.xml:5:5-44
 MERGED from [com.google.firebase:firebase-auth:23.2.0] C:\Users\kates\.gradle\caches\8.10.2\transforms\4a13622334858c09faed678cbe66f441\transformed\jetified-firebase-auth-23.2.0\AndroidManifest.xml:21:5-23:151
@@ -694,7 +697,7 @@ ADDED from [androidx.core:core:1.13.1] C:\Users\kates\.gradle\caches\8.10.2\tran
 		ADDED from [androidx.core:core:1.13.1] C:\Users\kates\.gradle\caches\8.10.2\transforms\256e1d53a61812322a65f0ac417dccd3\transformed\core-1.13.1\AndroidManifest.xml:24:9-44
 	android:name
 		ADDED from [androidx.core:core:1.13.1] C:\Users\kates\.gradle\caches\8.10.2\transforms\256e1d53a61812322a65f0ac417dccd3\transformed\core-1.13.1\AndroidManifest.xml:23:9-81
-permission#com.example.birthday_planner.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+permission#com.cpp.birthday_gift.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
 ADDED from [androidx.core:core:1.13.1] C:\Users\kates\.gradle\caches\8.10.2\transforms\256e1d53a61812322a65f0ac417dccd3\transformed\core-1.13.1\AndroidManifest.xml:22:5-24:47
 	android:protectionLevel
 		ADDED from [androidx.core:core:1.13.1] C:\Users\kates\.gradle\caches\8.10.2\transforms\256e1d53a61812322a65f0ac417dccd3\transformed\core-1.13.1\AndroidManifest.xml:24:9-44
@@ -704,7 +707,7 @@ uses-permission#${applicationId}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
 ADDED from [androidx.core:core:1.13.1] C:\Users\kates\.gradle\caches\8.10.2\transforms\256e1d53a61812322a65f0ac417dccd3\transformed\core-1.13.1\AndroidManifest.xml:26:5-97
 	android:name
 		ADDED from [androidx.core:core:1.13.1] C:\Users\kates\.gradle\caches\8.10.2\transforms\256e1d53a61812322a65f0ac417dccd3\transformed\core-1.13.1\AndroidManifest.xml:26:22-94
-uses-permission#com.example.birthday_planner.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+uses-permission#com.cpp.birthday_gift.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
 ADDED from [androidx.core:core:1.13.1] C:\Users\kates\.gradle\caches\8.10.2\transforms\256e1d53a61812322a65f0ac417dccd3\transformed\core-1.13.1\AndroidManifest.xml:26:5-97
 	android:name
 		ADDED from [androidx.core:core:1.13.1] C:\Users\kates\.gradle\caches\8.10.2\transforms\256e1d53a61812322a65f0ac417dccd3\transformed\core-1.13.1\AndroidManifest.xml:26:22-94

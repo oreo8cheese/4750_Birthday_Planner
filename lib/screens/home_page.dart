@@ -58,10 +58,16 @@ class MyHomePage extends StatelessWidget {
         child: Column(
           children: <Widget>[
             const SizedBox(height: 20),
+            Image.asset(
+              'assets/calendaricon.png',
+              height: 200,
+              width: 200,
+            ),
+            const SizedBox(height: 20),
             Text(
               'Time To Plan!',
               style: TextStyle(
-                fontSize: 24,
+                fontSize: 32,
                 fontWeight: FontWeight.bold,
                 color: Colors.pink[700],
               ),
@@ -70,24 +76,37 @@ class MyHomePage extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: <Widget>[
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const ContactBookPage()),
-                      );
-                    },
-                    child: const Text('Contact Book'),
+                  SizedBox(
+                    width: 250,
+                    height: 60,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const ContactBookPage()),
+                        );
+                      },
+                      child: const Text(
+                        'Contact Book',
+                        style: TextStyle(fontSize: 20),
+                      ),
+                    ),
                   ),
-                  ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const Calendar()),
-                      );
-                    },
-
-                    child: const Text('Calendar'),
+                  SizedBox(
+                    width: 250,
+                    height: 60,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const Calendar()),
+                        );
+                      },
+                      child: const Text(
+                        'Calendar',
+                        style: TextStyle(fontSize: 20),
+                      ),
+                    ),
                   ),
                 ],
               ),

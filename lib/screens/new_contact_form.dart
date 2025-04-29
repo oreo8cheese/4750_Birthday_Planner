@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'contact.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+import 'package:path_provider/path_provider.dart' show getApplicationSupportDirectory;
 
 // You'll need to create this new widget in a separate file: lib/screens/new_contact_form.dart
 class NewContactForm extends StatefulWidget {
@@ -59,7 +59,7 @@ class _NewContactFormState extends State<NewContactForm> {
           _lastNameController.text = data['lastName'] ?? '';
           _selectedGender = data['gender'];
           _relationshipController.text = data['relationship'] ?? '';
-          existingPhotoUrl = data['photoUrl'];
+          existingPhotoUrl = data['photoPath'];
           
           // Handle birthday
           if (data['birthday'] != null) {
@@ -143,27 +143,26 @@ class _NewContactFormState extends State<NewContactForm> {
 
   Future<String?> _uploadImage(File imageFile, String contactId) async {
     try {
-      // Create a unique path for the image
-      final String path = 'contact_photos/${FirebaseAuth.instance.currentUser!.uid}/$contactId/${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final appDir = await getApplicationSupportDirectory();
+      print('App directory: ${appDir.path}');
       
-      // Create the storage reference
-      final ref = FirebaseStorage.instance.ref().child(path);
+      final contactPhotosDir = Directory('${appDir.path}/contact_photos');
+      if (!await contactPhotosDir.exists()) {
+        await contactPhotosDir.create(recursive: true);
+        print('Created contact photos directory');
+      }
+
+      final fileName = '${contactId}_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final localPath = '${contactPhotosDir.path}/$fileName';
+      print('Attempting to save image to: $localPath');
+
+      // Copy the image file to our local storage
+      final newFile = await imageFile.copy(localPath);
+      print('Image copied successfully: ${newFile.existsSync()}');
       
-      // Upload the file with content type
-      final metadata = SettableMetadata(
-        contentType: 'image/jpeg',
-        customMetadata: {'picked-file-path': imageFile.path}
-      );
-      
-      // Upload the file
-      await ref.putFile(imageFile, metadata);
-      
-      // Get the download URL
-      final url = await ref.getDownloadURL();
-      print('Image uploaded successfully. URL: $url'); // Add debug print
-      return url;
+      return localPath;
     } catch (e) {
-      print('Failed to upload image: $e');
+      print('Failed to save image locally: $e');
       return null;
     }
   }
@@ -216,7 +215,7 @@ class _NewContactFormState extends State<NewContactForm> {
                     backgroundImage: _imageFile != null
                         ? FileImage(_imageFile!)
                         : (existingPhotoUrl != null && existingPhotoUrl!.isNotEmpty)
-                            ? NetworkImage(existingPhotoUrl!) as ImageProvider
+                            ? FileImage(File(existingPhotoUrl!)) as ImageProvider
                             : null,
                     child: (_imageFile == null && (existingPhotoUrl == null || existingPhotoUrl!.isEmpty))
                         ? const Icon(
@@ -279,7 +278,7 @@ class _NewContactFormState extends State<NewContactForm> {
                 readOnly: true,
                 controller: TextEditingController(
                   text: selectedDate != null 
-                      ? "${selectedDate!.day}/${selectedDate!.month}/${selectedDate!.year}"
+                      ? "${selectedDate!.month}/${selectedDate!.day}/${selectedDate!.year}"
                       : "",
                 ),
                 onTap: () async {
@@ -310,7 +309,7 @@ class _NewContactFormState extends State<NewContactForm> {
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: () async {
-                  // Check only name is required
+                  // Validate required fields
                   if (_firstNameController.text.isEmpty || _lastNameController.text.isEmpty) {
                     showDialog(
                       context: context,
@@ -333,13 +332,13 @@ class _NewContactFormState extends State<NewContactForm> {
                   }
 
                   try {
-                    // Create contact data with only required fields
+                    // Create contact data with required fields
                     final Map<String, dynamic> contactData = {
                       "firstName": _firstNameController.text,
                       "lastName": _lastNameController.text,
                     };
 
-                    // Add optional fields only if they have values
+                    // Add optional fields
                     if (_selectedGender != null) {
                       contactData["gender"] = _selectedGender.toString();
                     }
@@ -368,27 +367,31 @@ class _NewContactFormState extends State<NewContactForm> {
                       contactData["dislikes"] = dislikes;
                     }
 
+                    // First, save/update the contact to get a valid contactId
                     final contactsCollection = FirebaseFirestore.instance
                         .collection("users")
                         .doc(FirebaseAuth.instance.currentUser!.uid)
                         .collection("contacts");
 
-                    late DocumentReference docRef;
+                    String contactId;
                     if (widget.isEditing) {
-                      docRef = contactsCollection.doc(widget.contactId);
-                      await docRef.update(contactData);
+                      contactId = widget.contactId!;
+                      await contactsCollection.doc(contactId).update(contactData);
                     } else {
-                      docRef = await contactsCollection.add(contactData);
+                      final docRef = await contactsCollection.add(contactData);
+                      contactId = docRef.id;
                     }
 
-                    // If there's a new image, upload it and update the contact
+                    // Now handle image upload with the valid contactId
                     if (_imageFile != null) {
-                      final imageUrl = await _uploadImage(_imageFile!, docRef.id);
-                      if (imageUrl != null) {
-                        print('Updating contact with photo URL: $imageUrl');
-                        await docRef.update({'photoUrl': imageUrl});
+                      final imagePath = await _uploadImage(_imageFile!, contactId);
+                      if (imagePath != null) {
+                        print('Image saved locally at: $imagePath');
+                        // Update the contact with the photo path
+                        await contactsCollection.doc(contactId).update({'photoPath': imagePath});
+                        print('Photo path saved to Firestore: $imagePath');
                       } else {
-                        print('Failed to get image URL');
+                        print('Failed to save image locally');
                       }
                     }
 

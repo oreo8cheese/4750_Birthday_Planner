@@ -4,7 +4,7 @@
     "type": "COMPATIBLE_SCREEN_MANIFEST",
     "kind": "Directory"
   },
-  "applicationId": "com.example.birthday_planner",
+  "applicationId": "com.cpp.birthday_gift",
   "variantName": "debug",
   "elements": []
 }

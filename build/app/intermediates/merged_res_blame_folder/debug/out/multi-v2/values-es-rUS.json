@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.birthday_planner.app-mergeDebugResources-48:/values-es-rUS/values-es-rUS.xml",
+            "outputFile": "com.cpp.birthday_gift.app-mergeDebugResources-48:/values-es-rUS/values-es-rUS.xml",
             "map": [
                 {
                     "source": "C:\\Users\\kates\\.gradle\\caches\\8.10.2\\transforms\\2fd84d592932a5f9551b47d356248ee0\\transformed\\jetified-play-services-basement-18.4.0\\res\\values-es-rUS\\values.xml",

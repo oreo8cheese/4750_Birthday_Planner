@@ -1,8 +1,8 @@
 1<?xml version="1.0" encoding="utf-8"?>
 2<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-3    package="com.example.birthday_planner"
-4    android:versionCode="1"
-5    android:versionName="1.0.0" >
+3    package="com.cpp.birthday_gift"
+4    android:versionCode="3"
+5    android:versionName="3.0.0" >
 6
 7    <uses-sdk
 8        android:minSdkVersion="23"
@@ -54,12 +54,12 @@
 36
 37    <permission
 37-->[androidx.core:core:1.13.1] C:\Users\kates\.gradle\caches\8.10.2\transforms\256e1d53a61812322a65f0ac417dccd3\transformed\core-1.13.1\AndroidManifest.xml:22:5-24:47
-38        android:name="com.example.birthday_planner.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
+38        android:name="com.cpp.birthday_gift.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION"
 38-->[androidx.core:core:1.13.1] C:\Users\kates\.gradle\caches\8.10.2\transforms\256e1d53a61812322a65f0ac417dccd3\transformed\core-1.13.1\AndroidManifest.xml:23:9-81
 39        android:protectionLevel="signature" />
 39-->[androidx.core:core:1.13.1] C:\Users\kates\.gradle\caches\8.10.2\transforms\256e1d53a61812322a65f0ac417dccd3\transformed\core-1.13.1\AndroidManifest.xml:24:9-44
 40
-41    <uses-permission android:name="com.example.birthday_planner.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
+41    <uses-permission android:name="com.cpp.birthday_gift.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION" />
 41-->[androidx.core:core:1.13.1] C:\Users\kates\.gradle\caches\8.10.2\transforms\256e1d53a61812322a65f0ac417dccd3\transformed\core-1.13.1\AndroidManifest.xml:26:5-97
 41-->[androidx.core:core:1.13.1] C:\Users\kates\.gradle\caches\8.10.2\transforms\256e1d53a61812322a65f0ac417dccd3\transformed\core-1.13.1\AndroidManifest.xml:26:22-94
 42
@@ -69,10 +69,10 @@
 45-->[androidx.core:core:1.13.1] C:\Users\kates\.gradle\caches\8.10.2\transforms\256e1d53a61812322a65f0ac417dccd3\transformed\core-1.13.1\AndroidManifest.xml:28:18-86
 46        android:debuggable="true"
 47        android:extractNativeLibs="false"
-48        android:icon="@mipmap/ic_launcher"
+48        android:icon="@mipmap/launcher_icon"
 49        android:label="birthday_planner" >
 50        <activity
-51            android:name="com.example.birthday_planner.MainActivity"
+51            android:name="com.cpp.birthday_gift.MainActivity"
 52            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
 53            android:exported="true"
 54            android:hardwareAccelerated="true"
@@ -197,7 +197,7 @@
 129-->[:image_picker_android] C:\Users\kates\StudioProjects\birthday_planner\build\image_picker_android\intermediates\merged_manifest\debug\AndroidManifest.xml:9:9-17:20
 130            android:name="io.flutter.plugins.imagepicker.ImagePickerFileProvider"
 130-->[:image_picker_android] C:\Users\kates\StudioProjects\birthday_planner\build\image_picker_android\intermediates\merged_manifest\debug\AndroidManifest.xml:10:13-82
-131            android:authorities="com.example.birthday_planner.flutter.image_provider"
+131            android:authorities="com.cpp.birthday_gift.flutter.image_provider"
 131-->[:image_picker_android] C:\Users\kates\StudioProjects\birthday_planner\build\image_picker_android\intermediates\merged_manifest\debug\AndroidManifest.xml:11:13-74
 132            android:exported="false"
 132-->[:image_picker_android] C:\Users\kates\StudioProjects\birthday_planner\build\image_picker_android\intermediates\merged_manifest\debug\AndroidManifest.xml:12:13-37
@@ -302,7 +302,7 @@
 188-->[com.google.firebase:firebase-common:21.0.0] C:\Users\kates\.gradle\caches\8.10.2\transforms\52e37da1a944d6554ae3c8063707221b\transformed\jetified-firebase-common-21.0.0\AndroidManifest.xml:23:9-28:39
 189            android:name="com.google.firebase.provider.FirebaseInitProvider"
 189-->[com.google.firebase:firebase-common:21.0.0] C:\Users\kates\.gradle\caches\8.10.2\transforms\52e37da1a944d6554ae3c8063707221b\transformed\jetified-firebase-common-21.0.0\AndroidManifest.xml:24:13-77
-190            android:authorities="com.example.birthday_planner.firebaseinitprovider"
+190            android:authorities="com.cpp.birthday_gift.firebaseinitprovider"
 190-->[com.google.firebase:firebase-common:21.0.0] C:\Users\kates\.gradle\caches\8.10.2\transforms\52e37da1a944d6554ae3c8063707221b\transformed\jetified-firebase-common-21.0.0\AndroidManifest.xml:25:13-72
 191            android:directBootAware="true"
 191-->[com.google.firebase:firebase-common:21.0.0] C:\Users\kates\.gradle\caches\8.10.2\transforms\52e37da1a944d6554ae3c8063707221b\transformed\jetified-firebase-common-21.0.0\AndroidManifest.xml:26:13-43
@@ -380,7 +380,7 @@
 232-->[androidx.lifecycle:lifecycle-process:2.7.0] C:\Users\kates\.gradle\caches\8.10.2\transforms\ff122a27f543d8ffd358d241edc173d5\transformed\jetified-lifecycle-process-2.7.0\AndroidManifest.xml:24:9-32:20
 233            android:name="androidx.startup.InitializationProvider"
 233-->[androidx.lifecycle:lifecycle-process:2.7.0] C:\Users\kates\.gradle\caches\8.10.2\transforms\ff122a27f543d8ffd358d241edc173d5\transformed\jetified-lifecycle-process-2.7.0\AndroidManifest.xml:25:13-67
-234            android:authorities="com.example.birthday_planner.androidx-startup"
+234            android:authorities="com.cpp.birthday_gift.androidx-startup"
 234-->[androidx.lifecycle:lifecycle-process:2.7.0] C:\Users\kates\.gradle\caches\8.10.2\transforms\ff122a27f543d8ffd358d241edc173d5\transformed\jetified-lifecycle-process-2.7.0\AndroidManifest.xml:26:13-68
 235            android:exported="false" >
 235-->[androidx.lifecycle:lifecycle-process:2.7.0] C:\Users\kates\.gradle\caches\8.10.2\transforms\ff122a27f543d8ffd358d241edc173d5\transformed\jetified-lifecycle-process-2.7.0\AndroidManifest.xml:27:13-37

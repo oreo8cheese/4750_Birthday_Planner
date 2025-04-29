@@ -4,15 +4,15 @@
     "type": "PACKAGED_MANIFESTS",
     "kind": "Directory"
   },
-  "applicationId": "com.example.birthday_planner",
+  "applicationId": "com.cpp.birthday_gift",
   "variantName": "debug",
   "elements": [
     {
       "type": "SINGLE",
       "filters": [],
       "attributes": [],
-      "versionCode": 1,
-      "versionName": "1.0.0",
+      "versionCode": 3,
+      "versionName": "3.0.0",
       "outputFile": "AndroidManifest.xml"
     }
   ],

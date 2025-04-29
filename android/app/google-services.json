@@ -7,9 +7,9 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:371701653269:android:6bfdde1159ab56bd60531c",
+        "mobilesdk_app_id": "1:371701653269:android:519c4a887d76554560531c",
         "android_client_info": {
-          "package_name": "com.example.birthday_planner"
+          "package_name": "com.cpp.birthday_gift"
         }
       },
       "oauth_client": [],

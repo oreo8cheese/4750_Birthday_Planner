@@ -141,6 +141,11 @@ class ContactDetailsPage extends StatelessWidget {
     final priceRange = await _showPriceRangeDialog(context);
     if (priceRange == null) return;
 
+    final currentGiftIdeas = List<String>.from(contactData['giftIdeas'] ?? []);
+    final savedIdeasNotifier = ValueNotifier<Set<String>>(
+      Set.from(currentGiftIdeas),
+    );
+
     Future<void> generateAndShowSuggestions() async {
       try {
         showDialog(
@@ -162,11 +167,6 @@ class ContactDetailsPage extends StatelessWidget {
 
         if (!context.mounted) return;
         Navigator.pop(context); // Dismiss loading dialog
-
-        final currentGiftIdeas = List<String>.from(contactData['giftIdeas'] ?? []);
-        final savedIdeasNotifier = ValueNotifier<Set<String>>(
-          Set.from(currentGiftIdeas),
-        );
 
         showDialog(
           context: context,
@@ -363,116 +363,151 @@ class ContactDetailsPage extends StatelessWidget {
           final DateTime birthday = birthdayTimestamp?.toDate() ?? DateTime.now();
 
           return SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Center(
-                  child: CircleAvatar(
-                    radius: 60,
-                    backgroundColor: Colors.grey[300],
-                    backgroundImage: contactData['photoUrl']?.isNotEmpty == true
-                        ? NetworkImage(contactData['photoUrl'])
-                        : null,
-                    child: (contactData['photoUrl']?.isEmpty ?? true)
-                        ? Text(
-                            '${firstName.isNotEmpty ? firstName[0] : ''}${lastName.isNotEmpty ? lastName[0] : ''}',
-                            style: const TextStyle(fontSize: 40),
-                          )
-                        : null,
-                  ),
-                ),
-                const SizedBox(height: 24),
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    ElevatedButton.icon(
-                      onPressed: () => _showGiftSuggestions(context, contactData),
-                      icon: const Icon(Icons.card_giftcard),
-                      label: const Text('Gift Ideas'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.pink[100],
+                    // Photo container with rounded rectangle shape
+                    Container(
+                      width: 160,
+                      height: 200,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(12),
+                        child: contactData['photoPath']?.isNotEmpty == true
+                          ? (() {
+                              print('Attempting to load photo from: ${contactData['photoPath']}');
+                              final file = File(contactData['photoPath']);
+                              if (!file.existsSync()) {
+                                print('Warning: Image file does not exist at path');
+                                return Center(
+                                  child: Text(
+                                    '${firstName.isNotEmpty ? firstName[0] : ''}${lastName.isNotEmpty ? lastName[0] : ''}',
+                                    style: const TextStyle(fontSize: 40),
+                                  ),
+                                );
+                              }
+                              return Image.file(
+                                file,
+                                fit: BoxFit.cover,
+                              );
+                            })()
+                          : Center(
+                              child: Text(
+                                '${firstName.isNotEmpty ? firstName[0] : ''}${lastName.isNotEmpty ? lastName[0] : ''}',
+                        style: const TextStyle(fontSize: 40),
+                              ),
+                            ),
                       ),
                     ),
-                    ElevatedButton.icon(
-                      onPressed: () => _showBirthdayMessage(context, contactData),
-                      icon: const Icon(Icons.message),
-                      label: const Text('Birthday Message'),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.pink[100],
+                    const SizedBox(width: 16),
+                    // Personal Information next to photo
+                    Expanded(
+                      child: Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                children: [
+                                  const Icon(Icons.person, size: 24),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      '$firstName $lastName',
+                                      style: const TextStyle(fontSize: 20),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  Icon(
+                                    gender.toLowerCase() == 'female' 
+                                        ? Icons.female 
+                                        : gender.toLowerCase() == 'male' 
+                                            ? Icons.male 
+                                            : Icons.transgender,
+                                    size: 24,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    gender,
+                                    style: const TextStyle(fontSize: 20),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  const Icon(Icons.cake, size: 24),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    '${birthday.month}/${birthday.day}/${birthday.year}',
+                                    style: const TextStyle(fontSize: 20),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Row(
+                                children: [
+                                  const Icon(Icons.favorite, size: 24),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    relationship,
+                                    style: const TextStyle(fontSize: 20),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 24),
-                _buildInfoSection('Personal Information', [
-                  _buildInfoRow('First Name', firstName),
-                  _buildInfoRow('Last Name', lastName),
-                  _buildInfoRow('Gender', gender),
-                  _buildInfoRow('Birthday', 
-                    '${birthday.day}/${birthday.month}/${birthday.year}'),
-                  _buildInfoRow('Relationship', relationship),
-                ]),
                 const SizedBox(height: 16),
                 _buildListSection('Likes', likes),
-                const SizedBox(height: 16),
+            const SizedBox(height: 16),
                 _buildListSection('Dislikes', dislikes),
-                const SizedBox(height: 16),
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text(
-                              'Gift Ideas',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            IconButton(
-                              icon: const Icon(Icons.add),
-                              onPressed: () => _addGiftIdea(context, contactId, giftIdeas),
-                            ),
-                          ],
+            const SizedBox(height: 16),
+                _buildGiftIdeasSection(giftIdeas, context),
+                const SizedBox(height: 24),
+                // Buttons at bottom
+                Row(
+                  children: [
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () => _showGiftSuggestions(context, contactData),
+                        icon: const Icon(Icons.card_giftcard),
+                        label: const Text('Gift Ideas'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.pink[100],
+                          padding: const EdgeInsets.symmetric(vertical: 12),
                         ),
-                        const SizedBox(height: 8),
-                        ...giftIdeas.asMap().entries.map((entry) => Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 4),
-                          child: Row(
-                            children: [
-                              const Icon(Icons.card_giftcard, size: 16),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(entry.value),
-                              ),
-                              IconButton(
-                                icon: const Icon(Icons.delete_outline, size: 20),
-                                onPressed: () => _removeGiftIdea(
-                                  context,
-                                  contactId,
-                                  giftIdeas,
-                                  entry.key,
-                                ),
-                              ),
-                            ],
-                          ),
-                        )),
-                        if (giftIdeas.isEmpty)
-                          const Text(
-                            'No gift ideas yet. Add your own or generate some!',
-                            style: TextStyle(
-                              fontStyle: FontStyle.italic,
-                              color: Colors.grey,
-                            ),
-                          ),
-                      ],
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: ElevatedButton.icon(
+                        onPressed: () => _showBirthdayMessage(context, contactData),
+                        icon: const Icon(Icons.message),
+                        label: const Text('Birthday Message'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.pink[100],
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -544,6 +579,65 @@ class ContactDetailsPage extends StatelessWidget {
                 ],
               ),
             )),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGiftIdeasSection(List<String> giftIdeas, BuildContext context) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Gift Ideas',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.add),
+                  onPressed: () => _addGiftIdea(context, contactId, giftIdeas),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            ...giftIdeas.asMap().entries.map((entry) => Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: Row(
+                children: [
+                  const Icon(Icons.card_giftcard, size: 16),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(entry.value),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline, size: 20),
+                    onPressed: () => _removeGiftIdea(
+                      context,
+                      contactId,
+                      giftIdeas,
+                      entry.key,
+                    ),
+                  ),
+                ],
+              ),
+            )),
+            if (giftIdeas.isEmpty)
+              const Text(
+                'No gift ideas yet. Add your own or generate some!',
+                style: TextStyle(
+                  fontStyle: FontStyle.italic,
+                  color: Colors.grey,
+                ),
+              ),
           ],
         ),
       ),

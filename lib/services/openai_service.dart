@@ -132,11 +132,16 @@ class OpenAIService {
           'messages': [
             {
               'role': 'system',
-              'content': 'You are a thoughtful message writer who creates personalized birthday messages.'
+              'content': '''You are a thoughtful message writer who creates personalized birthday messages.
+              Important rules:
+              - Use only plain text, no special characters or emojis
+              - Keep the message warm and heartfelt
+              - Use proper punctuation and capitalization
+              - Avoid using any symbols or decorative elements'''
             },
             {
               'role': 'user',
-              'content': 'Write a warm and heartfelt birthday message for my $relationship named $firstName.'
+              'content': 'Write a warm and heartfelt birthday message for my $relationship named $firstName. Use only plain text, no special characters or emojis.'
             }
           ],
           'temperature': 0.7,

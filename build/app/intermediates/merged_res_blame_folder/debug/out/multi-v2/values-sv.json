@@ -1,7 +1,7 @@
 {
     "logs": [
         {
-            "outputFile": "com.example.birthday_planner.app-mergeDebugResources-48:/values-sv/values-sv.xml",
+            "outputFile": "com.cpp.birthday_gift.app-mergeDebugResources-48:/values-sv/values-sv.xml",
             "map": [
                 {
                     "source": "C:\\Users\\kates\\.gradle\\caches\\8.10.2\\transforms\\256e1d53a61812322a65f0ac417dccd3\\transformed\\core-1.13.1\\res\\values-sv\\values-sv.xml",

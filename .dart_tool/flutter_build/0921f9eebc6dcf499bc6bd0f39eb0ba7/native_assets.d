@@ -1,1 +1,0 @@
- C:\\Users\\kates\\StudioProjects\\birthday_planner\\.dart_tool\\flutter_build\\0921f9eebc6dcf499bc6bd0f39eb0ba7\\native_assets.yaml: 
