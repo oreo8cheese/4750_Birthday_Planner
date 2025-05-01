@@ -358,16 +358,17 @@ class ContactDetailsPage extends StatelessWidget {
           final likes = List<String>.from(contactData['likes'] ?? []);
           final dislikes = List<String>.from(contactData['dislikes'] ?? []);
           final giftIdeas = List<String>.from(contactData['giftIdeas'] ?? []);
+          final additionalDates = List<Map<String, dynamic>>.from(contactData['additionalDates'] ?? []);
           
           // Convert Timestamp to DateTime
           final Timestamp? birthdayTimestamp = contactData['birthday'];
           final DateTime birthday = birthdayTimestamp?.toDate() ?? DateTime.now();
 
           return SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -402,7 +403,7 @@ class ContactDetailsPage extends StatelessWidget {
                           : Center(
                               child: Text(
                                 '${firstName.isNotEmpty ? firstName[0] : ''}${lastName.isNotEmpty ? lastName[0] : ''}',
-                        style: GoogleFonts.satisfy(fontSize: 40),
+                                style: GoogleFonts.satisfy(fontSize: 40),
                               ),
                             ),
                       ),
@@ -476,10 +477,12 @@ class ContactDetailsPage extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 16),
+                _buildSpecialDatesSection(additionalDates),
+                const SizedBox(height: 16),
                 _buildListSection('Likes', likes),
-            const SizedBox(height: 16),
+                const SizedBox(height: 16),
                 _buildListSection('Dislikes', dislikes),
-            const SizedBox(height: 16),
+                const SizedBox(height: 16),
                 _buildGiftIdeasSection(giftIdeas, context),
                 const SizedBox(height: 24),
                 // Buttons at bottom
@@ -642,6 +645,54 @@ class ContactDetailsPage extends StatelessWidget {
                 style: TextStyle(
                   fontStyle: FontStyle.italic,
                   color: Colors.grey,
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSpecialDatesSection(List<Map<String, dynamic>> dates) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Special Dates',
+              style: GoogleFonts.vollkorn(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 8),
+            ...dates.asMap().entries.map((entry) {
+              final date = (entry.value['date'] as Timestamp).toDate();
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: Row(
+                  children: [
+                    const Icon(Icons.calendar_today, size: 16),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        '${entry.value['name']}: ${date.month}/${date.day}/${date.year}',
+                        style: GoogleFonts.vollkorn(fontSize: 16),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }),
+            if (dates.isEmpty)
+              Text(
+                'No special dates added yet.',
+                style: GoogleFonts.vollkorn(
+                  fontStyle: FontStyle.italic,
+                  color: Colors.grey,
+                  fontSize: 16,
                 ),
               ),
           ],

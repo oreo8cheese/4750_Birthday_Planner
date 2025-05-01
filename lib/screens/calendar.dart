@@ -37,6 +37,8 @@ class _CalendarState extends State<Calendar> {
 
       for (var doc in contactsSnapshot.docs) {
         final data = doc.data();
+        
+        // Add birthday event
         if (data['birthday'] != null) {
           final Timestamp birthdayTimestamp = data['birthday'];
           final DateTime birthday = birthdayTimestamp.toDate();
@@ -57,7 +59,36 @@ class _CalendarState extends State<Calendar> {
             'name': '${data['firstName']} ${data['lastName']}',
             'contactId': doc.id,
             'originalBirthday': birthday,
+            'type': 'birthday',
           });
+        }
+
+        // Add additional dates
+        if (data['additionalDates'] != null) {
+          final additionalDates = List<Map<String, dynamic>>.from(data['additionalDates']);
+          for (var dateData in additionalDates) {
+            final Timestamp dateTimestamp = dateData['date'];
+            final DateTime date = dateTimestamp.toDate();
+            
+            // Create event date for this year
+            final eventDate = DateTime(
+              _focusedDay.year,
+              date.month,
+              date.day,
+            );
+
+            // Add to events map
+            if (!events.containsKey(eventDate)) {
+              events[eventDate] = [];
+            }
+            
+            events[eventDate]!.add({
+              'name': '${data['firstName']} ${data['lastName']} - ${dateData['name']}',
+              'contactId': doc.id,
+              'originalDate': date,
+              'type': 'special',
+            });
+          }
         }
       }
 
@@ -70,7 +101,7 @@ class _CalendarState extends State<Calendar> {
   }
 
   List<Map<String, dynamic>> _getEventsForDay(DateTime day) {
-    // Compare only month and day
+    // Normalize the day to only compare month and day
     final normalizedDay = DateTime(
       _focusedDay.year,
       day.month,
@@ -101,100 +132,83 @@ class _CalendarState extends State<Calendar> {
     return Scaffold(
       backgroundColor: Colors.pink[50],
       appBar: AppBar(
-        title: const Text('Birthday Calendar'),
+        title: Text('Calendar', style: GoogleFonts.vollkorn(fontSize: 24, fontWeight: FontWeight.bold)),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            Card(
-              elevation: 2,
-              child: TableCalendar(
-                firstDay: DateTime.utc(2024, 1, 1),
-                lastDay: DateTime.utc(2025, 12, 31),
-                focusedDay: _focusedDay,
-                calendarFormat: _calendarFormat,
-                selectedDayPredicate: (day) {
-                  return isSameDay(_selectedDay, day);
-                },
-                onDaySelected: _onDaySelected,
-                onFormatChanged: (format) {
-                  setState(() {
-                    _calendarFormat = format;
-                  });
-                },
-                eventLoader: _getEventsForDay,
-                calendarStyle: CalendarStyle(
-                  todayDecoration: BoxDecoration(
-                    color: Colors.pink[200],
-                    shape: BoxShape.circle,
-                  ),
-                  selectedDecoration: BoxDecoration(
-                    color: Colors.pink[400],
-                    shape: BoxShape.circle,
-                  ),
-                  markerDecoration: BoxDecoration(
-                    color: Colors.pink[300],
-                    shape: BoxShape.circle,
-                  ),
-                ),
-                headerStyle: HeaderStyle(
-                  formatButtonDecoration: BoxDecoration(
-                    color: Colors.pink[100],
-                    borderRadius: BorderRadius.circular(20.0),
-                  ),
-                  formatButtonTextStyle: TextStyle(color: Colors.pink[900]),
-                  titleCentered: true,
-                ),
+      body: Column(
+        children: [
+          TableCalendar(
+            firstDay: DateTime.utc(2020, 1, 1),
+            lastDay: DateTime.utc(2030, 12, 31),
+            focusedDay: _focusedDay,
+            calendarFormat: _calendarFormat,
+            selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
+            onDaySelected: (selectedDay, focusedDay) {
+              setState(() {
+                _selectedDay = selectedDay;
+                _focusedDay = focusedDay;
+              });
+            },
+            onFormatChanged: (format) {
+              setState(() {
+                _calendarFormat = format;
+              });
+            },
+            onPageChanged: (focusedDay) {
+              _focusedDay = focusedDay;
+              _loadBirthdays(); // Reload events when month changes
+            },
+            eventLoader: _getEventsForDay,
+            calendarStyle: CalendarStyle(
+              markerDecoration: BoxDecoration(
+                color: Colors.pink[300],
+                shape: BoxShape.circle,
               ),
             ),
-            const SizedBox(height: 20),
-            Expanded(
-              child: _selectedDay != null
-                  ? _buildEventList(_getEventsForDay(_selectedDay!))
-                  : const Center(
-                      child: Text('Select a day to see birthdays'),
-                    ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildEventList(List<Map<String, dynamic>> events) {
-    if (events.isEmpty) {
-      return const Center(
-        child: Text('No birthdays on this day'),
-      );
-    }
-
-    return ListView.builder(
-      itemCount: events.length,
-      itemBuilder: (context, index) {
-        final event = events[index];
-        final originalBirthday = event['originalBirthday'] as DateTime;
-        final age = _getAge(originalBirthday);
-        
-        return Card(
-          margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-          child: ListTile(
-            leading: const Icon(Icons.cake, color: Colors.pink),
-            title: Text(event['name'], style: GoogleFonts.vollkorn(fontSize: 20)),
-            subtitle: Text('Birthday $age', style: GoogleFonts.vollkorn(fontSize: 18)),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ContactDetailsPage(
-                    contactId: event['contactId'],
-                  ),
-                ),
-              );
-            },
           ),
-        );
-      },
+          if (_selectedDay != null)
+            Expanded(
+              child: ListView.builder(
+                itemCount: _getEventsForDay(_selectedDay!).length,
+                itemBuilder: (context, index) {
+                  final event = _getEventsForDay(_selectedDay!)[index];
+                  final isBirthday = event['type'] == 'birthday';
+                  final originalDate = event[isBirthday ? 'originalBirthday' : 'originalDate'];
+                  final age = _selectedDay!.year - originalDate.year;
+                  
+                  return Card(
+                    margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: ListTile(
+                      leading: Icon(
+                        isBirthday ? Icons.cake : Icons.calendar_today,
+                        color: Colors.pink[300],
+                      ),
+                      title: Text(
+                        event['name'],
+                        style: GoogleFonts.vollkorn(fontSize: 18),
+                      ),
+                      subtitle: isBirthday
+                          ? Text(
+                              'Turning $age years old',
+                              style: GoogleFonts.vollkorn(fontSize: 16),
+                            )
+                          : null,
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ContactDetailsPage(
+                              contactId: event['contactId'],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
+        ],
+      ),
     );
   }
 }

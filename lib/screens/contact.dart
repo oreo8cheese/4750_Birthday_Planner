@@ -7,6 +7,7 @@ class Contact {
   final String? imagePath;
   final List<String> likes;
   final List<String> dislikes;
+  final List<Map<String, dynamic>> additionalDates;
 
   Contact({
     required this.firstName,
@@ -17,6 +18,7 @@ class Contact {
     this.imagePath,
     required this.likes,
     required this.dislikes,
+    required this.additionalDates,
   });
 
   // Convert Contact to JSON
@@ -29,6 +31,7 @@ class Contact {
     'imagePath': imagePath,
     'likes': likes,
     'dislikes': dislikes,
+    'additionalDates': additionalDates,
   };
 
   // Create Contact from JSON
@@ -41,5 +44,6 @@ class Contact {
     imagePath: json['imagePath'],
     likes: List<String>.from(json['likes']),
     dislikes: List<String>.from(json['dislikes']),
+    additionalDates: List<Map<String, dynamic>>.from(json['additionalDates'] ?? []),
   );
 }

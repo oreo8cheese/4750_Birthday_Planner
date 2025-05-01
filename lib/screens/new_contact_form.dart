@@ -11,11 +11,13 @@ import 'package:google_fonts/google_fonts.dart';
 class NewContactForm extends StatefulWidget {
   final bool isEditing;
   final String? contactId;
+  final List<Map<String, dynamic>>? additionalDates;
 
   const NewContactForm({
     super.key, 
     this.isEditing = false, 
     this.contactId,
+    this.additionalDates,
   });
 
   @override
@@ -35,12 +37,16 @@ class _NewContactFormState extends State<NewContactForm> {
   final _relationshipController = TextEditingController();
   List<TextEditingController> likesControllers = [TextEditingController()];
   List<TextEditingController> dislikesControllers = [TextEditingController()];
+  List<Map<String, dynamic>> additionalDates = [];
 
   @override
   void initState() {
     super.initState();
     if (widget.isEditing) {
       _loadContactData();
+    }
+    if (widget.additionalDates != null) {
+      additionalDates = List.from(widget.additionalDates!);
     }
   }
 
@@ -79,6 +85,11 @@ class _NewContactFormState extends State<NewContactForm> {
           dislikesControllers = dislikes.map((dislike) => TextEditingController(text: dislike)).toList();
           if (dislikesControllers.isEmpty) {
             dislikesControllers.add(TextEditingController());
+          }
+
+          // Handle additional dates
+          if (data['additionalDates'] != null) {
+            additionalDates = List<Map<String, dynamic>>.from(data['additionalDates']);
           }
         });
       }
@@ -128,6 +139,7 @@ class _NewContactFormState extends State<NewContactForm> {
           .map((controller) => controller.text)
           .where((text) => text.isNotEmpty)
           .toList(),
+      additionalDates: additionalDates,
     );
 
     Navigator.pop(context, newContact);
@@ -192,6 +204,144 @@ class _NewContactFormState extends State<NewContactForm> {
         ),
       ],
     );
+  }
+
+  Widget _buildAdditionalDatesSection() {
+    return StatefulBuilder(
+      builder: (context, setState) => ExpansionTile(
+        title: Text(
+          'Special Dates',
+          style: GoogleFonts.vollkorn(
+            fontSize: 18,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        children: [
+          ...additionalDates.asMap().entries.map((entry) {
+            final date = (entry.value['date'] as Timestamp).toDate();
+            return Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      '${entry.value['name']}: ${date.month}/${date.day}/${date.year}',
+                      style: GoogleFonts.vollkorn(fontSize: 16),
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.delete_outline, size: 20),
+                    onPressed: () {
+                      setState(() {
+                        _removeAdditionalDate(entry.key);
+                      });
+                    },
+                  ),
+                ],
+              ),
+            );
+          }),
+          if (additionalDates.isEmpty)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: Text(
+                'No special dates added yet.',
+                style: GoogleFonts.vollkorn(
+                  fontStyle: FontStyle.italic,
+                  color: Colors.grey,
+                  fontSize: 16,
+                ),
+              ),
+            ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: IconButton(
+              icon: const Icon(Icons.add_circle),
+              onPressed: () async {
+                await _addAdditionalDate();
+                setState(() {}); // Force rebuild of the ExpansionTile
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _addAdditionalDate() async {
+    final TextEditingController nameController = TextEditingController();
+    final TextEditingController dateController = TextEditingController();
+    DateTime? selectedDate;
+    
+    return showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: Text('Add Special Date', style: GoogleFonts.vollkorn(fontSize: 22, fontWeight: FontWeight.bold)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(
+                  labelText: 'Date Name',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                decoration: const InputDecoration(
+                  labelText: 'Date',
+                  border: OutlineInputBorder(),
+                  suffixIcon: Icon(Icons.calendar_today),
+                ),
+                readOnly: true,
+                controller: dateController,
+                onTap: () async {
+                  final DateTime? picked = await showDatePicker(
+                    context: context,
+                    initialDate: selectedDate ?? DateTime.now(),
+                    firstDate: DateTime(1900),
+                    lastDate: DateTime(2100),
+                  );
+                  if (picked != null) {
+                    selectedDate = picked;
+                    dateController.text = "${picked.month}/${picked.day}/${picked.year}";
+                    setState(() {}); // Force rebuild
+                  }
+                },
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Cancel', style: GoogleFonts.vollkorn(fontSize: 16)),
+            ),
+            TextButton(
+              onPressed: () {
+                if (nameController.text.isNotEmpty && selectedDate != null) {
+                  setState(() {
+                    additionalDates.add({
+                      'name': nameController.text,
+                      'date': Timestamp.fromDate(selectedDate!),
+                    });
+                  });
+                  Navigator.pop(context);
+                }
+              },
+              child: Text('Add', style: GoogleFonts.vollkorn(fontSize: 16)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _removeAdditionalDate(int index) {
+    setState(() {
+      additionalDates.removeAt(index);
+    });
   }
 
   @override
@@ -304,6 +454,8 @@ class _NewContactFormState extends State<NewContactForm> {
                 ),
               ),
               const SizedBox(height: 16),
+              _buildAdditionalDatesSection(),
+              const SizedBox(height: 16),
               buildExpandableSection('Likes', likesControllers),
               buildExpandableSection('Dislikes', dislikesControllers),
               const SizedBox(height: 24),
@@ -365,6 +517,11 @@ class _NewContactFormState extends State<NewContactForm> {
                         .toList();
                     if (dislikes.isNotEmpty) {
                       contactData["dislikes"] = dislikes;
+                    }
+
+                    // Add additional dates
+                    if (additionalDates.isNotEmpty) {
+                      contactData["additionalDates"] = additionalDates;
                     }
 
                     // First, save/update the contact to get a valid contactId
