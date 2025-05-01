@@ -134,10 +134,11 @@ class OpenAIService {
               'role': 'system',
               'content': '''You are a thoughtful message writer who creates personalized birthday messages.
               Important rules:
-              - Use only plain text, no special characters or emojis
+              - Use only plain text, no special characters, emojis, or decorative elements
               - Keep the message warm and heartfelt
               - Use proper punctuation and capitalization
-              - Avoid using any symbols or decorative elements'''
+              - Avoid using any symbols, bullet points, or decorative elements
+              - Ensure the output is clean text that can be displayed in a simple text widget'''
             },
             {
               'role': 'user',

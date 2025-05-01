@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'contact_book_page.dart';
 import 'calendar.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_fonts/google_fonts.dart';
+
 
 class MyHomePage extends StatelessWidget {
   const MyHomePage({super.key});
@@ -46,7 +48,8 @@ class MyHomePage extends StatelessWidget {
       appBar: AppBar(
         automaticallyImplyLeading: false,
         backgroundColor: Colors.pink[100],
-        title: const Text('Birthday Planner'),
+        title: const Text('Birthday Planner'
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -66,9 +69,8 @@ class MyHomePage extends StatelessWidget {
             const SizedBox(height: 20),
             Text(
               'Time To Plan!',
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
+              style: GoogleFonts.satisfy(
+                fontSize: 45,
                 color: Colors.pink[700],
               ),
             ),
@@ -86,9 +88,9 @@ class MyHomePage extends StatelessWidget {
                           MaterialPageRoute(builder: (context) => const ContactBookPage()),
                         );
                       },
-                      child: const Text(
+                      child: Text(
                         'Contact Book',
-                        style: TextStyle(fontSize: 20),
+                        style: TextStyle(),
                       ),
                     ),
                   ),
@@ -102,9 +104,9 @@ class MyHomePage extends StatelessWidget {
                           MaterialPageRoute(builder: (context) => const Calendar()),
                         );
                       },
-                      child: const Text(
+                      child: Text(
                         'Calendar',
-                        style: TextStyle(fontSize: 20),
+                        style: TextStyle(),
                       ),
                     ),
                   ),

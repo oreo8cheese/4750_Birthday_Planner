@@ -4,6 +4,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'new_contact_form.dart';
 import 'contact_details_page.dart';
 import 'dart:io';
+import 'package:google_fonts/google_fonts.dart';
 
 class ContactBookPage extends StatefulWidget {
   const ContactBookPage({super.key});
@@ -15,6 +16,24 @@ class ContactBookPage extends StatefulWidget {
 class _ContactBookPageState extends State<ContactBookPage> {
   bool _isSelectionMode = false;
   final Set<String> _selectedContacts = {};
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(() {
+      setState(() {
+        _searchQuery = _searchController.text.toLowerCase();
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   void _toggleSelection(String contactId) {
     setState(() {
@@ -104,91 +123,123 @@ class _ContactBookPageState extends State<ContactBookPage> {
         backgroundColor: Colors.pink[300],
         child: const Icon(Icons.add, color: Colors.white),
       ) : null,
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance
-            .collection('users')
-            .doc(FirebaseAuth.instance.currentUser!.uid)
-            .collection('contacts')
-            .snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          }
-
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-            return const Center(child: Text('No contacts yet'));
-          }
-
-          return ListView.builder(
-            itemCount: snapshot.data!.docs.length,
-            itemBuilder: (context, index) {
-              final doc = snapshot.data!.docs[index];
-              final contactData = doc.data() as Map<String, dynamic>;
-              final firstName = contactData['firstName'] ?? '';
-              final lastName = contactData['lastName'] ?? '';
-
-              return Card(
-                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: ListTile(
-                  leading: CircleAvatar(
-                    radius: 25,
-                    backgroundColor: Colors.grey[300],
-                    backgroundImage: contactData['photoPath']?.isNotEmpty == true
-                        ? (() {
-                            final file = File(contactData['photoPath']);
-                            if (!file.existsSync()) {
-                              // Try alternative path if the original doesn't exist
-                              final alternativePath = contactData['photoPath'].replaceAll('/files/', '/app_flutter/');
-                              final alternativeFile = File(alternativePath);
-                              if (alternativeFile.existsSync()) {
-                                return FileImage(alternativeFile);
-                              }
-                              return null;
-                            }
-                            return FileImage(file);
-                          })()
-                        : null,
-                    child: (contactData['photoPath']?.isEmpty ?? true) || 
-                       (!File(contactData['photoPath'] ?? '').existsSync())
-                        ? Text(
-                            '${firstName.isNotEmpty ? firstName[0] : ''}${lastName.isNotEmpty ? lastName[0] : ''}',
-                            style: const TextStyle(fontSize: 20),
-                          )
-                        : null,
-                  ),
-                  title: Text('$firstName $lastName'),
-                  subtitle: contactData['relationship'] != null && contactData['relationship'].toString().isNotEmpty
-                      ? Text(contactData['relationship'])
-                      : null,
-                  onTap: () {
-                    if (_isSelectionMode) {
-                      _toggleSelection(doc.id);
-                    } else {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => ContactDetailsPage(
-                            contactId: doc.id,
-                          ),
-                        ),
-                      );
-                    }
-                  },
-                  trailing: _isSelectionMode ? Checkbox(
-                    value: _selectedContacts.contains(doc.id),
-                    onChanged: (bool? value) {
-                      _toggleSelection(doc.id);
-                    },
-                  ) : null,
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: TextField(
+              controller: _searchController,
+              decoration: InputDecoration(
+                hintText: 'Search contacts...',
+                prefixIcon: const Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
-              );
-            },
-          );
-        },
+                filled: true,
+                fillColor: Colors.white,
+              ),
+            ),
+          ),
+          Expanded(
+            child: StreamBuilder<QuerySnapshot>(
+              stream: FirebaseFirestore.instance
+                  .collection('users')
+                  .doc(FirebaseAuth.instance.currentUser!.uid)
+                  .collection('contacts')
+                  .snapshots(),
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return Center(child: Text('Error: ${snapshot.error}'));
+                }
+
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+
+                if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                  return const Center(child: Text('No contacts yet'));
+                }
+
+                // Filter contacts based on search query
+                final filteredDocs = snapshot.data!.docs.where((doc) {
+                  final contactData = doc.data() as Map<String, dynamic>;
+                  final firstName = contactData['firstName']?.toString().toLowerCase() ?? '';
+                  final lastName = contactData['lastName']?.toString().toLowerCase() ?? '';
+                  final fullName = '$firstName $lastName';
+                  return fullName.contains(_searchQuery);
+                }).toList();
+
+                if (filteredDocs.isEmpty) {
+                  return const Center(child: Text('No contacts found'));
+                }
+
+                return ListView.builder(
+                  itemCount: filteredDocs.length,
+                  itemBuilder: (context, index) {
+                    final doc = filteredDocs[index];
+                    final contactData = doc.data() as Map<String, dynamic>;
+                    final firstName = contactData['firstName'] ?? '';
+                    final lastName = contactData['lastName'] ?? '';
+
+                    return Card(
+                      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                      child: ListTile(
+                        leading: CircleAvatar(
+                          radius: 25,
+                          backgroundColor: Colors.grey[300],
+                          backgroundImage: contactData['photoPath']?.isNotEmpty == true
+                              ? (() {
+                                  final file = File(contactData['photoPath']);
+                                  if (!file.existsSync()) {
+                                    final alternativePath = contactData['photoPath'].replaceAll('/files/', '/app_flutter/');
+                                    final alternativeFile = File(alternativePath);
+                                    if (alternativeFile.existsSync()) {
+                                      return FileImage(alternativeFile);
+                                    }
+                                    return null;
+                                  }
+                                  return FileImage(file);
+                                })()
+                              : null,
+                          child: (!File(contactData['photoPath'] ?? '').existsSync())
+                              ? Text(
+                                  '${firstName.isNotEmpty ? firstName[0] : ''}${lastName.isNotEmpty ? lastName[0] : ''}',
+                                  style: GoogleFonts.satisfy(fontSize: 20),
+                                )
+                              : null,
+                        ),
+                        title: Text('$firstName $lastName', style: GoogleFonts.vollkorn(fontSize: 20)),
+                        subtitle: contactData['relationship'] != null && contactData['relationship'].toString().isNotEmpty
+                            ? Text(contactData['relationship'], style: GoogleFonts.vollkorn(fontSize: 16))
+                            : null,
+                        onTap: () {
+                          if (_isSelectionMode) {
+                            _toggleSelection(doc.id);
+                          } else {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => ContactDetailsPage(
+                                  contactId: doc.id,
+                                ),
+                              ),
+                            );
+                          }
+                        },
+                        trailing: _isSelectionMode ? Checkbox(
+                          value: _selectedContacts.contains(doc.id),
+                          onChanged: (bool? value) {
+                            _toggleSelection(doc.id);
+                          },
+                        ) : null,
+                      ),
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
     );
   }

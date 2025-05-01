@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'home_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
@@ -130,7 +131,6 @@ class _UserLoginPageState extends State<UserLoginPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Login'),
-        backgroundColor: Colors.pink[100],
       ),
       backgroundColor: Colors.pink[50],
       body: Padding(
@@ -142,9 +142,8 @@ class _UserLoginPageState extends State<UserLoginPage> {
               children: [
                 Text(
                   'Welcome Back!',
-                  style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
+                  style: GoogleFonts.satisfy(
+                    fontSize: 45,
                     color: Colors.pink[700],
                   ),
                 ),
@@ -190,10 +189,10 @@ class _UserLoginPageState extends State<UserLoginPage> {
                       vertical: 16,
                     ),
                   ),
-                  child: const Text(
+                  child: Text(
                     'Login',
                     style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 22,
                       color: Colors.white,
                     ),
                   ),

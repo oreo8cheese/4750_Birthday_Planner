@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-
+import 'package:google_fonts/google_fonts.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
@@ -187,10 +187,10 @@ class _RegisterPageState extends State<RegisterPage> {
                   backgroundColor: Colors.pink[300],
                   padding: const EdgeInsets.symmetric(vertical: 16),
                 ),
-                child: const Text(
+                child: Text(
                   'Register',
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 22,
                     color: Colors.white,
                   ),
                 ),

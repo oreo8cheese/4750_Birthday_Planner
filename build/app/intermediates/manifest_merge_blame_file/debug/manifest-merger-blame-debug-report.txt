@@ -13,17 +13,17 @@
 13         to allow setting breakpoints, to provide hot reload, etc.
 14    -->
 15    <uses-permission android:name="android.permission.INTERNET" />
-15-->C:\Users\kates\StudioProjects\birthday_planner\android\app\src\debug\AndroidManifest.xml:6:5-66
-15-->C:\Users\kates\StudioProjects\birthday_planner\android\app\src\debug\AndroidManifest.xml:6:22-64
+15-->C:\Users\kates\StudioProjects\birthday_planner\android\app\src\main\AndroidManifest.xml:2:5-66
+15-->C:\Users\kates\StudioProjects\birthday_planner\android\app\src\main\AndroidManifest.xml:2:22-64
 16    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-16-->C:\Users\kates\StudioProjects\birthday_planner\android\app\src\main\AndroidManifest.xml:2:5-79
-16-->C:\Users\kates\StudioProjects\birthday_planner\android\app\src\main\AndroidManifest.xml:2:22-77
+16-->C:\Users\kates\StudioProjects\birthday_planner\android\app\src\main\AndroidManifest.xml:3:5-79
+16-->C:\Users\kates\StudioProjects\birthday_planner\android\app\src\main\AndroidManifest.xml:3:22-77
 17    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-17-->C:\Users\kates\StudioProjects\birthday_planner\android\app\src\main\AndroidManifest.xml:3:5-80
-17-->C:\Users\kates\StudioProjects\birthday_planner\android\app\src\main\AndroidManifest.xml:3:22-78
+17-->C:\Users\kates\StudioProjects\birthday_planner\android\app\src\main\AndroidManifest.xml:4:5-80
+17-->C:\Users\kates\StudioProjects\birthday_planner\android\app\src\main\AndroidManifest.xml:4:22-78
 18    <uses-permission android:name="android.permission.CAMERA" />
-18-->C:\Users\kates\StudioProjects\birthday_planner\android\app\src\main\AndroidManifest.xml:4:5-64
-18-->C:\Users\kates\StudioProjects\birthday_planner\android\app\src\main\AndroidManifest.xml:4:22-62
+18-->C:\Users\kates\StudioProjects\birthday_planner\android\app\src\main\AndroidManifest.xml:5:5-64
+18-->C:\Users\kates\StudioProjects\birthday_planner\android\app\src\main\AndroidManifest.xml:5:22-62
 19    <!--
 20 Required to query activities that can process text, see:
 21         https://developer.android.com/training/package-visibility and
@@ -32,16 +32,16 @@
 24         In particular, this is used by the Flutter engine in io.flutter.plugin.text.ProcessTextPlugin.
 25    -->
 26    <queries>
-26-->C:\Users\kates\StudioProjects\birthday_planner\android\app\src\main\AndroidManifest.xml:42:5-47:15
+26-->C:\Users\kates\StudioProjects\birthday_planner\android\app\src\main\AndroidManifest.xml:43:5-48:15
 27        <intent>
-27-->C:\Users\kates\StudioProjects\birthday_planner\android\app\src\main\AndroidManifest.xml:43:9-46:18
+27-->C:\Users\kates\StudioProjects\birthday_planner\android\app\src\main\AndroidManifest.xml:44:9-47:18
 28            <action android:name="android.intent.action.PROCESS_TEXT" />
-28-->C:\Users\kates\StudioProjects\birthday_planner\android\app\src\main\AndroidManifest.xml:44:13-72
-28-->C:\Users\kates\StudioProjects\birthday_planner\android\app\src\main\AndroidManifest.xml:44:21-70
+28-->C:\Users\kates\StudioProjects\birthday_planner\android\app\src\main\AndroidManifest.xml:45:13-72
+28-->C:\Users\kates\StudioProjects\birthday_planner\android\app\src\main\AndroidManifest.xml:45:21-70
 29
 30            <data android:mimeType="text/plain" />
-30-->C:\Users\kates\StudioProjects\birthday_planner\android\app\src\main\AndroidManifest.xml:45:13-50
-30-->C:\Users\kates\StudioProjects\birthday_planner\android\app\src\main\AndroidManifest.xml:45:19-48
+30-->C:\Users\kates\StudioProjects\birthday_planner\android\app\src\main\AndroidManifest.xml:46:13-50
+30-->C:\Users\kates\StudioProjects\birthday_planner\android\app\src\main\AndroidManifest.xml:46:19-48
 31        </intent>
 32    </queries>
 33
@@ -259,7 +259,7 @@
 161-->[com.google.firebase:firebase-auth:23.2.0] C:\Users\kates\.gradle\caches\8.10.2\transforms\4a13622334858c09faed678cbe66f441\transformed\jetified-firebase-auth-23.2.0\AndroidManifest.xml:39:27-75
 162
 163                <data
-163-->C:\Users\kates\StudioProjects\birthday_planner\android\app\src\main\AndroidManifest.xml:45:13-50
+163-->C:\Users\kates\StudioProjects\birthday_planner\android\app\src\main\AndroidManifest.xml:46:13-50
 164                    android:host="firebase.auth"
 165                    android:path="/"
 166                    android:scheme="genericidp" />
@@ -291,7 +291,7 @@
 179-->[com.google.firebase:firebase-auth:23.2.0] C:\Users\kates\.gradle\caches\8.10.2\transforms\4a13622334858c09faed678cbe66f441\transformed\jetified-firebase-auth-23.2.0\AndroidManifest.xml:39:27-75
 180
 181                <data
-181-->C:\Users\kates\StudioProjects\birthday_planner\android\app\src\main\AndroidManifest.xml:45:13-50
+181-->C:\Users\kates\StudioProjects\birthday_planner\android\app\src\main\AndroidManifest.xml:46:13-50
 182                    android:host="firebase.auth"
 183                    android:path="/"
 184                    android:scheme="recaptcha" />

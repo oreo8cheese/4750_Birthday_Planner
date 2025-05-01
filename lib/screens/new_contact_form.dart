@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import 'contact.dart';
 import 'package:path_provider/path_provider.dart' show getApplicationSupportDirectory;
+import 'package:google_fonts/google_fonts.dart';
 
 // You'll need to create this new widget in a separate file: lib/screens/new_contact_form.dart
 class NewContactForm extends StatefulWidget {
@@ -198,7 +199,6 @@ class _NewContactFormState extends State<NewContactForm> {
     return Scaffold(
       backgroundColor: Colors.pink[50],
       appBar: AppBar(
-        backgroundColor: Colors.pink[100],
         title: Text(widget.isEditing ? 'Edit Contact' : 'New Contact'),
       ),
       body: Padding(
@@ -427,8 +427,6 @@ class _NewContactFormState extends State<NewContactForm> {
                 child: Text(
                   widget.isEditing ? 'Update Contact' : 'Save Contact',
                   style: const TextStyle(
-                    fontSize: 16,
-                    color: Colors.black87,
                   ),
                 ),
               ),

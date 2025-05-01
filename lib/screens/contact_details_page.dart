@@ -5,6 +5,7 @@ import 'dart:io';
 import 'new_contact_form.dart';
 import '../services/openai_service.dart';
 import '../config/api_config.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class ContactDetailsPage extends StatelessWidget {
   final String contactId; // Change from Contact to String to store document ID
@@ -171,13 +172,13 @@ class ContactDetailsPage extends StatelessWidget {
         showDialog(
           context: context,
           builder: (context) => AlertDialog(
-            title: Text('Gift Ideas for ${contactData['firstName']}'),
+            title: Text('Gift Ideas for ${contactData['firstName']}', style: GoogleFonts.vollkorn(fontSize: 22, fontWeight: FontWeight.bold)),
             content: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('Price Range: $priceRange'),
+                  Text('Price Range: $priceRange', style: GoogleFonts.vollkorn(fontSize: 18, fontWeight: FontWeight.w500)),
                   const SizedBox(height: 16),
                   ...suggestions.map((suggestion) {
                     final displaySuggestion = '${suggestion.idea} - ${suggestion.explanation} (Around ${suggestion.approximatePrice})';
@@ -192,7 +193,7 @@ class ContactDetailsPage extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Expanded(
-                                child: Text(displaySuggestion),
+                                child: Text(displaySuggestion, style: GoogleFonts.vollkorn(fontSize: 16)),
                               ),
                               IconButton(
                                 icon: Icon(
@@ -216,11 +217,12 @@ class ContactDetailsPage extends StatelessWidget {
                     );
                   }),
                   const SizedBox(height: 16),
-                  const Text(
+                  Text(
                     'Click the + button to save a suggestion to your gift ideas list.',
-                    style: TextStyle(
+                    style: GoogleFonts.vollkorn(
                       fontStyle: FontStyle.italic,
                       color: Colors.grey,
+                      fontSize: 16,
                     ),
                   ),
                 ],
@@ -229,15 +231,15 @@ class ContactDetailsPage extends StatelessWidget {
             actions: [
               TextButton(
                 onPressed: () => Navigator.pop(context),
-                child: const Text('Close'),
+                child: Text('Close', style: GoogleFonts.vollkorn(fontSize: 16)),
               ),
               TextButton.icon(
-                onPressed: () {
-                  Navigator.pop(context);
-                  generateAndShowSuggestions();
+                onPressed: () async {
+                  Navigator.pop(context); // Close current dialog
+                  await generateAndShowSuggestions(); // Show new suggestions
                 },
                 icon: const Icon(Icons.refresh),
-                label: const Text('Regenerate'),
+                label: Text('Regenerate', style: GoogleFonts.vollkorn(fontSize: 16)),
                 style: TextButton.styleFrom(
                   foregroundColor: Colors.pink[700],
                 ),
@@ -284,7 +286,7 @@ class ContactDetailsPage extends StatelessWidget {
         builder: (context) => AlertDialog(
           title: Text('Birthday Message for ${contactData['firstName']}'),
           content: SingleChildScrollView(
-            child: Text(message),
+            child: Text(message, style: GoogleFonts.vollkorn(fontSize: 18)),
           ),
           actions: [
             TextButton(
@@ -310,7 +312,6 @@ class ContactDetailsPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.pink[50],
       appBar: AppBar(
-        backgroundColor: Colors.pink[100],
         title: const Text('Contact Details'),
         actions: [
           IconButton(
@@ -389,7 +390,7 @@ class ContactDetailsPage extends StatelessWidget {
                                 return Center(
                                   child: Text(
                                     '${firstName.isNotEmpty ? firstName[0] : ''}${lastName.isNotEmpty ? lastName[0] : ''}',
-                                    style: const TextStyle(fontSize: 40),
+                                    style: GoogleFonts.satisfy(fontSize: 40),
                                   ),
                                 );
                               }
@@ -401,7 +402,7 @@ class ContactDetailsPage extends StatelessWidget {
                           : Center(
                               child: Text(
                                 '${firstName.isNotEmpty ? firstName[0] : ''}${lastName.isNotEmpty ? lastName[0] : ''}',
-                        style: const TextStyle(fontSize: 40),
+                        style: GoogleFonts.satisfy(fontSize: 40),
                               ),
                             ),
                       ),
@@ -422,7 +423,7 @@ class ContactDetailsPage extends StatelessWidget {
                                   Expanded(
                                     child: Text(
                                       '$firstName $lastName',
-                                      style: const TextStyle(fontSize: 20),
+                                      style: GoogleFonts.vollkorn(fontSize: 20),
                                     ),
                                   ),
                                 ],
@@ -441,7 +442,7 @@ class ContactDetailsPage extends StatelessWidget {
                                   const SizedBox(width: 8),
                                   Text(
                                     gender,
-                                    style: const TextStyle(fontSize: 20),
+                                    style: GoogleFonts.vollkorn(fontSize: 20),
                                   ),
                                 ],
                               ),
@@ -452,7 +453,7 @@ class ContactDetailsPage extends StatelessWidget {
                                   const SizedBox(width: 8),
                                   Text(
                                     '${birthday.month}/${birthday.day}/${birthday.year}',
-                                    style: const TextStyle(fontSize: 20),
+                                    style: GoogleFonts.vollkorn(fontSize: 20),
                                   ),
                                 ],
                               ),
@@ -463,7 +464,7 @@ class ContactDetailsPage extends StatelessWidget {
                                   const SizedBox(width: 8),
                                   Text(
                                     relationship,
-                                    style: const TextStyle(fontSize: 20),
+                                    style: GoogleFonts.vollkorn(fontSize: 20),
                                   ),
                                 ],
                               ),
@@ -483,8 +484,10 @@ class ContactDetailsPage extends StatelessWidget {
                 const SizedBox(height: 24),
                 // Buttons at bottom
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Expanded(
+                    Flexible(
+                      flex: 3,
                       child: ElevatedButton.icon(
                         onPressed: () => _showGiftSuggestions(context, contactData),
                         icon: const Icon(Icons.card_giftcard),
@@ -492,11 +495,13 @@ class ContactDetailsPage extends StatelessWidget {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.pink[100],
                           padding: const EdgeInsets.symmetric(vertical: 12),
+                          minimumSize: const Size.fromHeight(50),
                         ),
                       ),
                     ),
                     const SizedBox(width: 16),
-                    Expanded(
+                    Flexible(
+                      flex: 4,
                       child: ElevatedButton.icon(
                         onPressed: () => _showBirthdayMessage(context, contactData),
                         icon: const Icon(Icons.message),
@@ -504,6 +509,7 @@ class ContactDetailsPage extends StatelessWidget {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.pink[100],
                           padding: const EdgeInsets.symmetric(vertical: 12),
+                          minimumSize: const Size.fromHeight(50),
                         ),
                       ),
                     ),
@@ -564,7 +570,7 @@ class ContactDetailsPage extends StatelessWidget {
             Text(
               title,
               style: const TextStyle(
-                fontSize: 18,
+                fontSize: 22,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -575,7 +581,7 @@ class ContactDetailsPage extends StatelessWidget {
                 children: [
                   const Icon(Icons.circle, size: 8),
                   const SizedBox(width: 8),
-                  Text(item),
+                  Text(item, style: TextStyle(fontSize: 20),),
                 ],
               ),
             )),
@@ -598,7 +604,7 @@ class ContactDetailsPage extends StatelessWidget {
                 const Text(
                   'Gift Ideas',
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: 22,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -616,7 +622,7 @@ class ContactDetailsPage extends StatelessWidget {
                   const Icon(Icons.card_giftcard, size: 16),
                   const SizedBox(width: 8),
                   Expanded(
-                    child: Text(entry.value),
+                    child: Text(entry.value, style: TextStyle(fontSize: 20),),
                   ),
                   IconButton(
                     icon: const Icon(Icons.delete_outline, size: 20),

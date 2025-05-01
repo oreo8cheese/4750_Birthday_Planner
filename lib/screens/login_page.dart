@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'register_page.dart';
 import 'user_login_page.dart';
 
@@ -21,9 +22,8 @@ class LoginPage extends StatelessWidget {
             const SizedBox(height: 30),
             Text(
               'Welcome!',
-              style: TextStyle(
-                fontSize: 32,
-                fontWeight: FontWeight.bold,
+              style: GoogleFonts.satisfy(
+                fontSize: 45,
                 color: Colors.pink[700],
               ),
             ),
@@ -38,9 +38,9 @@ class LoginPage extends StatelessWidget {
                     MaterialPageRoute(builder: (context) => const UserLoginPage()),
                   );
                 },
-                child: const Text(
+                child: Text(
                   'Login',
-                  style: TextStyle(fontSize: 18),
+                  style: TextStyle(fontSize: 22),
                 ),
               ),
             ),
@@ -55,9 +55,9 @@ class LoginPage extends StatelessWidget {
                     MaterialPageRoute(builder: (context) => const RegisterPage()),
                   );
                 },
-                child: const Text(
+                child: Text(
                   'Register',
-                  style: TextStyle(fontSize: 18),
+                  style: TextStyle(fontSize: 22),
                 ),
               ),
             ),

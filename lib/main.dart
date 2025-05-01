@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'screens/login_page.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 
 void main() async {
@@ -22,6 +23,35 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.pink[100]!),
         useMaterial3: true,
+        textTheme: GoogleFonts.vollkornTextTheme(
+          ThemeData.light().textTheme,
+        ).apply(
+          bodyColor: const Color(0xFF5D4037),
+          displayColor: const Color(0xFF5D4037),
+        ),
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.pink[100],
+          titleTextStyle: GoogleFonts.satisfy(
+            fontSize: 32,
+            color: const Color(0xFF5D4037),
+          ),
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            textStyle: GoogleFonts.satisfy(
+              fontSize: 22,
+              color: const Color(0xFF5D4037),
+            ),
+          ),
+        ),
+        textButtonTheme: TextButtonThemeData(
+          style: TextButton.styleFrom(
+            textStyle: GoogleFonts.vollkorn(
+              fontSize: 20,
+              color: const Color(0xFF5D4037),
+            ),
+          ),
+        ),
       ),
       home: const SplashScreen(),
     );

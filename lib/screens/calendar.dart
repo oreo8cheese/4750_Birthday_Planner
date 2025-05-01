@@ -3,6 +3,7 @@ import 'package:table_calendar/table_calendar.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'contact_details_page.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class Calendar extends StatefulWidget {
   const Calendar({super.key});
@@ -100,7 +101,6 @@ class _CalendarState extends State<Calendar> {
     return Scaffold(
       backgroundColor: Colors.pink[50],
       appBar: AppBar(
-        backgroundColor: Colors.pink[100],
         title: const Text('Birthday Calendar'),
       ),
       body: Padding(
@@ -180,8 +180,8 @@ class _CalendarState extends State<Calendar> {
           margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
           child: ListTile(
             leading: const Icon(Icons.cake, color: Colors.pink),
-            title: Text(event['name']),
-            subtitle: Text('Birthday $age'),
+            title: Text(event['name'], style: GoogleFonts.vollkorn(fontSize: 20)),
+            subtitle: Text('Birthday $age', style: GoogleFonts.vollkorn(fontSize: 18)),
             onTap: () {
               Navigator.push(
                 context,
