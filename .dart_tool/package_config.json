@@ -417,7 +417,7 @@
     },
     {
       "name": "shared_preferences",
-      "rootUri": "file:///C:/Users/kates/AppData/Local/Pub/Cache/hosted/pub.dev/shared_preferences-2.5.2",
+      "rootUri": "file:///C:/Users/kates/AppData/Local/Pub/Cache/hosted/pub.dev/shared_preferences-2.5.3",
       "packageUri": "lib/",
       "languageVersion": "3.5"
     },
@@ -560,7 +560,7 @@
       "languageVersion": "3.6"
     }
   ],
-  "generated": "2025-05-01T02:39:30.366298Z",
+  "generated": "2025-05-01T10:15:36.015373Z",
   "generator": "pub",
   "generatorVersion": "3.6.1",
   "flutterRoot": "file:///C:/Users/kates/flutter",
