@@ -5,6 +5,7 @@ import 'firebase_options.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'screens/home_page.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -68,10 +69,25 @@ class AuthWrapper extends StatefulWidget {
 
 class _AuthWrapperState extends State<AuthWrapper> {
   bool _showSplash = true;
+  bool _isFirstTime = true;
 
   @override
   void initState() {
     super.initState();
+    _checkFirstTime();
+  }
+
+  Future<void> _checkFirstTime() async {
+    final prefs = await SharedPreferences.getInstance();
+    _isFirstTime = prefs.getBool('isFirstTime') ?? true;
+    
+    if (_isFirstTime) {
+      // Sign out any existing user
+      await FirebaseAuth.instance.signOut();
+      // Mark that the app has been run before
+      await prefs.setBool('isFirstTime', false);
+    }
+
     // Show splash screen for 2 seconds
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted) {
@@ -95,7 +111,7 @@ class _AuthWrapperState extends State<AuthWrapper> {
           return const SplashScreen();
         }
         
-        if (snapshot.hasData) {
+        if (snapshot.hasData && !_isFirstTime) {
           return const MyHomePage();
         }
         
