@@ -7,7 +7,7 @@ Functions include:
 - Searching the calendar for upcoming birthdays
 
 # Tools
-**Dart:**
+**Dart/Flutter:**
 - UI design and app logic
 
 **Firebase:**
